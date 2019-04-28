@@ -1,10 +1,9 @@
+#include <stdio.h>
+
 #include <Arduino.h>
 
 #include <Encoder.h>
-
-#define private public
 #include <PID_v1.h>
-#undef private
 
 // TODO set and correct all names
 #define MOTOR_LEFT_EN 11    // EN_B
@@ -65,13 +64,15 @@ void setup()
     pidLeft.setpoint = 0;
     pidLeft.controller.SetMode(AUTOMATIC);
     pidLeft.controller.SetOutputLimits(-255, 255);
-    pidLeft.controller.SetTunings(2.5, 0, 0);
+//    pidLeft.controller.SetTunings(5, .5, 0.05);
+//    pidLeft.controller.SetTunings(4, 10, 0.01);
+    pidLeft.controller.SetTunings(2, 16, 0.15);
 
     pidRight.input = 0;
     pidRight.setpoint = 0;
     pidRight.controller.SetMode(AUTOMATIC);
     pidRight.controller.SetOutputLimits(-255, 255);
-    pidRight.controller.SetTunings(2.5, 0, 0);
+    pidRight.controller.SetTunings(2, 16, 0.15);
 
     delay(3000);
 }
@@ -81,11 +82,12 @@ void loop()
     // ENCODER
     long newPositionLeft, newPositionRight;
     float angularVelocityLeft, angularVelocityRight;
-    newPositionLeft = encLeft.read();   // mod?
+    newPositionLeft = encLeft.read();   // TODO mod?
     newPositionRight = -encRight.read();    // correct direction
     unsigned long encNow = millis();
     angularVelocityLeft = angularVelocity(positionLeft, newPositionLeft, encLastTime, encNow);
     angularVelocityRight = angularVelocity(positionRight, newPositionRight, encLastTime, encNow);
+#ifdef DEBUG
     Serial.print("pos Left = ");
     Serial.print(newPositionLeft);
     Serial.print(", pos Right = ");
@@ -103,18 +105,41 @@ void loop()
     Serial.print(", ang vel Right (rpm) = ");
     Serial.print(angularVelocityRight / (2 * PI) * 60);
     Serial.println();
+#endif
     encLastTime = encNow;
     positionLeft = newPositionLeft;
     positionRight = newPositionRight;
-    // serial write out (ang) vel, and pos
+
+#ifndef DEBUG
+    String buf;
+
+    // write wheels' ang. velocity and position
+    buf += angularVelocityLeft;
+    buf += ',';
+    buf += angularVelocityRight;
+    buf += ',';
+    buf += positionLeft;
+    buf += ',';
+    buf += positionRight;
+    buf += ';';
+    Serial.print(buf);
+
+    // TODO maybe reaeding too soon
+    // read setpoints
+    buf.remove(0);
+    while (Serial.available() > 0) {
+        buf += (char) Serial.read();
+        delay(10);
+    }
+#endif
 
     // PID
 #define RPM_TO_RAD_S(val)   (val / 60.0f * 2 * PI)
     pidLeft.input = angularVelocityLeft;
-    pidLeft.setpoint = RPM_TO_RAD_S(-200);
+    pidLeft.setpoint = RPM_TO_RAD_S(600);
     pidLeft.controller.Compute();
     pidRight.input = angularVelocityRight;
-    pidRight.setpoint = RPM_TO_RAD_S(-200);
+    pidRight.setpoint = RPM_TO_RAD_S(600);
     pidRight.controller.Compute();
 #undef  RAD_S_TO_RPM
 
@@ -144,7 +169,5 @@ void loop()
         digitalWrite(MOTOR_IN_4, HIGH);
     }
     analogWrite(MOTOR_RIGHT_EN, rightMotorValue);
-
-    delay(50);
 }
 
