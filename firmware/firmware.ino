@@ -122,26 +122,30 @@ void loop()
     buf += ',';
     buf += positionRight;
     buf += ';';
-    Serial.print(buf);
+    Serial.println(buf);
 
-    // TODO maybe reaeding too soon
-    // read setpoints
-    buf.remove(0);
-    while (Serial.available() > 0) {
-        buf += (char) Serial.read();
-        delay(10);
+    // read and set setpoints
+    if (Serial.available() > 0) {
+        buf.remove(0);
+        while (Serial.available() > 0) {
+            buf += (char) Serial.read();
+            delay(10);
+        }
+
+        pidLeft.setpoint = buf.toDouble();
+        buf.remove(0, buf.indexOf(',') + 1);
+        pidRight.setpoint = buf.toDouble();
     }
-#endif
-
-    // PID
+#else
 #define RPM_TO_RAD_S(val)   (val / 60.0f * 2 * PI)
-    pidLeft.input = angularVelocityLeft;
     pidLeft.setpoint = RPM_TO_RAD_S(600);
-    pidLeft.controller.Compute();
-    pidRight.input = angularVelocityRight;
     pidRight.setpoint = RPM_TO_RAD_S(600);
+#undef RPM_TO_RAD_S
+#endif
+    pidLeft.input = angularVelocityLeft;
+    pidRight.input = angularVelocityRight;
+    pidLeft.controller.Compute();
     pidRight.controller.Compute();
-#undef  RAD_S_TO_RPM
 
     // left motor
     int leftMotorValue = abs(pidLeft.output);
