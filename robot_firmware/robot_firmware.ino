@@ -137,7 +137,7 @@ void loop()
         pidRight.setpoint = buf.toDouble();
     }
 #else
-#define RPM_TO_RAD_S(val)   (val / 60.0f * 2 * PI)
+#define RPM_TO_RAD_S(val)   ((val) / 60.0f * 2 * PI)
     pidLeft.setpoint = RPM_TO_RAD_S(600);
     pidRight.setpoint = RPM_TO_RAD_S(600);
 #undef RPM_TO_RAD_S
