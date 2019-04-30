@@ -33,6 +33,7 @@ void RightWheelAngVelCallback(const std_msgs::Float32& msg) {
 int main(int argc, char* argv[]) {
     ros::init(argc, argv, robot_constants::nodes::kSerialNode);
     ros::NodeHandle nh;
+    ROS_INFO_STREAM_NAMED(robot_constants::nodes::kSerialNode, "started node ");
 
     ros::Subscriber left_wheel_set_ang_vel_sub = nh.subscribe(
             robot_constants::topics::kLeftWheelSetAngVel,
@@ -62,6 +63,8 @@ int main(int argc, char* argv[]) {
     nh.getParam("/serial_port", port);
     nh.getParam("/serial_baud_rate", baud);
     serial::Serial serial_port(port, baud);
+    ROS_INFO_STREAM_NAMED(robot_constants::nodes::kSerialNode,
+                          "initialized serial port on " << port << " with baud " << baud);
 
     ros::Rate loop_rate(50);
     while (ros::ok()) {
