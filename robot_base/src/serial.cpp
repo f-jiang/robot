@@ -8,6 +8,9 @@
 
 #include <serial/serial.h>
 
+#include <robot_constants/nodes.h>
+#include <robot_constants/topics.h>
+
 float left_wheel_set_ang_vel = 0;
 float prev_left_wheel_set_ang_vel = 0;
 float right_wheel_set_ang_vel = 0;
@@ -28,18 +31,31 @@ void RightWheelAngVelCallback(const std_msgs::Float32& msg) {
 }
 
 int main(int argc, char* argv[]) {
-    ros::init(argc, argv, "serial_node");
+    ros::init(argc, argv, robot_constants::nodes::kSerialNode);
     ros::NodeHandle nh;
 
-    // TODO global headers with topic and node names
-    ros::Subscriber left_wheel_set_ang_vel_sub = nh.subscribe("left_wheel_set_ang_vel", 1000, LeftWheelAngVelCallback);
-    ros::Subscriber right_wheel_set_ang_vel_sub = nh.subscribe("right_wheel_set_ang_vel", 1000, RightWheelAngVelCallback);
-    // TODO consider custom msg for below
-    ros::Publisher left_wheel_cur_pos_pub = nh.advertise<std_msgs::Int32>("left_wheel_cur_pos", 1000);
-    ros::Publisher right_wheel_cur_pos_pub = nh.advertise<std_msgs::Int32>("right_wheel_cur_pos", 1000);
+    ros::Subscriber left_wheel_set_ang_vel_sub = nh.subscribe(
+            robot_constants::topics::kLeftWheelSetAngVel,
+            1000,
+            LeftWheelAngVelCallback);
+    ros::Subscriber right_wheel_set_ang_vel_sub = nh.subscribe(
+            robot_constants::topics::kRightWheelSetAngVel,
+            1000,
+            RightWheelAngVelCallback);
 
-    ros::Publisher left_wheel_cur_ang_vel_pub = nh.advertise<std_msgs::Float32>("left_wheel_cur_ang_vel", 1000);
-    ros::Publisher right_wheel_cur_ang_vel_pub = nh.advertise<std_msgs::Float32>("right_wheel_cur_ang_vel", 1000);
+    // TODO consider custom msg for below
+    ros::Publisher left_wheel_cur_pos_pub = nh.advertise<std_msgs::Int32>(
+            robot_constants::topics::kLeftWheelCurPos,
+            1000);
+    ros::Publisher right_wheel_cur_pos_pub = nh.advertise<std_msgs::Int32>(
+            robot_constants::topics::kRightWheelCurPos,
+            1000);
+    ros::Publisher left_wheel_cur_ang_vel_pub = nh.advertise<std_msgs::Float32>(
+            robot_constants::topics::kLeftWheelCurAngVel,
+            1000);
+    ros::Publisher right_wheel_cur_ang_vel_pub = nh.advertise<std_msgs::Float32>(
+            robot_constants::topics::kRightWheelCurAngVel,
+            1000);
 
     std::string port;
     int baud;

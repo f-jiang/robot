@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   serial
 )
 
+find_package(robot_constants REQUIRED)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -25,6 +27,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${robot_constants_INCLUDE_DIRS}
 )
 
 add_executable(serial_node src/serial.cpp)
