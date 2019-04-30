@@ -173,5 +173,7 @@ void loop()
         digitalWrite(MOTOR_IN_4, HIGH);
     }
     analogWrite(MOTOR_RIGHT_EN, rightMotorValue);
+
+    delay(20);
 }
 
