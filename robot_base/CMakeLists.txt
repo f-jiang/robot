@@ -27,3 +27,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(serial_node src/serial.cpp)
+target_link_libraries(serial_node ${catkin_LIBRARIES})
+
