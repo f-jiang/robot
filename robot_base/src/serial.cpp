@@ -95,10 +95,12 @@ int main(int argc, char* argv[]) {
 
         // read from serial, and publish pos and ang_vel
         try {
-            std::string buf = serial_port.readline();
+            std::string buf;
+            size_t bytes_read = serial_port.readline(buf);
 
             if (!buf.empty()) {
-                ROS_DEBUG_STREAM_NAMED(robot_constants::nodes::kSerialNode, "serial read: " << buf);
+                ROS_DEBUG_STREAM_NAMED(robot_constants::nodes::kSerialNode,
+                                       "serial read (" << bytes_read << " bytes): " << buf);
                 size_t buf_idx;
                 long left_wheel_cur_pos = std::stoi(buf, &buf_idx);
                 long right_wheel_cur_pos = std::stoi(buf.substr(buf_idx + 1), &buf_idx);
