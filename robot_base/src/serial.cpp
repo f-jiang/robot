@@ -98,6 +98,7 @@ int main(int argc, char* argv[]) {
         vel_msg.data = right_wheel_cur_ang_vel;
         right_wheel_cur_ang_vel_pub.publish(vel_msg);
 
+        ros::spinOnce();
         loop_rate.sleep();
     }
 
