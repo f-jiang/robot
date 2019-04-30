@@ -102,20 +102,24 @@ int main(int argc, char* argv[]) {
                 ROS_DEBUG_STREAM_NAMED(robot_constants::nodes::kSerialNode,
                                        "serial read (" << bytes_read << " bytes): " << buf);
                 size_t buf_idx;
-                long left_wheel_cur_pos = std::stoi(buf, &buf_idx);
-                long right_wheel_cur_pos = std::stoi(buf.substr(buf_idx + 1), &buf_idx);
-                float left_wheel_cur_ang_vel = std::stof(buf.substr(buf_idx + 1), &buf_idx);
+                float left_wheel_cur_ang_vel = std::stof(buf, &buf_idx);
                 float right_wheel_cur_ang_vel = std::stof(buf.substr(buf_idx + 1), &buf_idx);
-                std_msgs::Int32 pos_msg;
+                long left_wheel_cur_pos = std::stol(buf.substr(buf_idx + 1), &buf_idx);
+                long right_wheel_cur_pos = std::stol(buf.substr(buf_idx + 1));
                 std_msgs::Float32 vel_msg;
-                pos_msg.data = left_wheel_cur_pos;
-                left_wheel_cur_pos_pub.publish(pos_msg);
-                pos_msg.data = right_wheel_cur_pos;
-                right_wheel_cur_pos_pub.publish(pos_msg);
+                std_msgs::Int32 pos_msg;
+
                 vel_msg.data = left_wheel_cur_ang_vel;
                 left_wheel_cur_ang_vel_pub.publish(vel_msg);
+
                 vel_msg.data = right_wheel_cur_ang_vel;
                 right_wheel_cur_ang_vel_pub.publish(vel_msg);
+
+                pos_msg.data = left_wheel_cur_pos;
+                left_wheel_cur_pos_pub.publish(pos_msg);
+
+                pos_msg.data = right_wheel_cur_pos;
+                right_wheel_cur_pos_pub.publish(pos_msg);
             }
         } catch (const std::exception& e) {
             ROS_ERROR_STREAM_NAMED(robot_constants::nodes::kSerialNode,
