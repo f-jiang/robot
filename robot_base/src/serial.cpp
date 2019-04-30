@@ -103,9 +103,12 @@ int main(int argc, char* argv[]) {
                                        "serial read (" << bytes_read << " bytes): " << buf);
                 size_t buf_idx;
                 float left_wheel_cur_ang_vel = std::stof(buf, &buf_idx);
-                float right_wheel_cur_ang_vel = std::stof(buf.substr(buf_idx + 1), &buf_idx);
-                long left_wheel_cur_pos = std::stol(buf.substr(buf_idx + 1), &buf_idx);
-                long right_wheel_cur_pos = std::stol(buf.substr(buf_idx + 1));
+                buf.erase(0, buf_idx + 1);
+                float right_wheel_cur_ang_vel = std::stof(buf, &buf_idx);
+                buf.erase(0, buf_idx + 1);
+                long left_wheel_cur_pos = std::stol(buf, &buf_idx);
+                buf.erase(0, buf_idx + 1);
+                long right_wheel_cur_pos = std::stol(buf);
                 std_msgs::Float32 vel_msg;
                 std_msgs::Int32 pos_msg;
 
