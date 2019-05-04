@@ -48,6 +48,10 @@ float angularVelocity(const long& oldPosition,
            / ((newTime - oldTime) / 1000.0f);
 }
 
+float angularPosition(const long& position) {
+    return (position / static_cast<float>(ENC_PULSES_PER_REVOLUTION)) * (PI * 2);
+}
+
 void setup()
 {
     Serial.begin(57600);
@@ -118,9 +122,9 @@ void loop()
     buf += ',';
     buf += angularVelocityRight;
     buf += ',';
-    buf += positionLeft;
+    buf += angularPosition(positionLeft);
     buf += ',';
-    buf += positionRight;
+    buf += angularPosition(positionRight);
     buf += ';';
     Serial.println(buf);
 

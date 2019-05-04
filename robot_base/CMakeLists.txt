@@ -30,6 +30,9 @@ include_directories(
   ${robot_constants_INCLUDE_DIRS}
 )
 
+add_executable(base_node src/base.cpp)
+target_link_libraries(base_node ${catkin_LIBRARIES})
+
 add_executable(serial_node src/serial.cpp)
 target_link_libraries(serial_node ${catkin_LIBRARIES})
 
