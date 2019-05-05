@@ -1,0 +1,30 @@
+<launch>
+	<node name="joy_node"
+          pkg="joy"
+	      type="joy_node"
+	      output="screen">
+        <param name="~dev" value="/dev/input/js0"/>
+    </node>
+
+	<node pkg="teleop_twist_joy"
+	      name="teleop_node"
+	      type="teleop_node"
+	      output="screen">
+	    <!-- mappings for x360 controller -->
+	    <param name="~axis_linear" value="1" type="int"/>
+	    <param name="~axis_angular" value="3" type="int"/>
+        <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
+    </node>
+      
+	<!-- base_node and serial_node -->
+    <include file="$(find robot_base)/launch/hw_base.launch"/>
+
+	<!-- load diff drive controller -->
+    <rosparam command="load" file="$(find robot_control)/param/robot_base.yaml"/>
+
+    <node name="controller_spawner"
+          pkg="controller_manager"
+          type="spawner"
+          output="screen"
+          args="base_controller"/>
+</launch>

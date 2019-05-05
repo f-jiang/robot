@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>robot_control</name>
+  <version>0.0.0</version>
+  <description>The robot_control package</description>
+
+  <maintainer email="feilan@todo.todo">feilan</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>controller_manager</build_depend>
+  <build_depend>diff_drive_controller</build_depend>
+  <build_export_depend>controller_manager</build_export_depend>
+  <build_export_depend>diff_drive_controller</build_export_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>diff_drive_controller</exec_depend>
+
+  <export>
+  </export>
+</package>
