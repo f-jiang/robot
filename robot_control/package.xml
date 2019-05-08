@@ -11,10 +11,16 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>controller_manager</build_depend>
   <build_depend>diff_drive_controller</build_depend>
+  <build_depend>rplidar</build_depend>
+  <build_depend>usb_cam</build_depend>
   <build_export_depend>controller_manager</build_export_depend>
   <build_export_depend>diff_drive_controller</build_export_depend>
+  <build_export_depend>rplidar</build_export_depend>
+  <build_export_depend>usb_cam</build_export_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>diff_drive_controller</exec_depend>
+  <exec_depend>rplidar</exec_depend>
+  <exec_depend>usb_cam</exec_depend>
 
   <export>
   </export>
