@@ -1,12 +1,12 @@
 <launch>
-    <!-- <param name="/serial_port" value="/dev/ttyUSB0" type="str"/>
+    <param name="/serial_port" value="/dev/ttyUSB0" type="str"/>
     <param name="/serial_baud_rate" value="57600" type="int"/>
 
     <node name="serial_node"
           pkg="robot_base"
           type="serial_node"
           output="screen"
-          respawn="true"/> -->
+          respawn="true"/>
 
     <node name="base_node"
           pkg="robot_base"
