@@ -15,4 +15,6 @@
         <param name="~axis_angular" value="3" type="int"/>
         <remap from="cmd_vel" to="/$(arg drive_controller_name)/cmd_vel"/>
     </node>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_control)/rviz/teleop.rviz"/>
 </launch>

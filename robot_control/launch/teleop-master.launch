@@ -27,6 +27,4 @@
                value="$(find robot_base)/calibration/camera.yaml"
                type="string"/>
     </node>
-
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_control)/rviz/teleop.rviz"/>
 </launch>
