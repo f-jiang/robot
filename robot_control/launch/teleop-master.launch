@@ -1,6 +1,9 @@
 <launch>
     <arg name="drive_controller_name" value="base_controller"/>
 
+    <!-- base_node and serial_node -->
+    <include file="$(find robot_base)/launch/hw_base.launch"/>
+
     <!-- load diff drive controller -->
     <rosparam command="load" file="$(find robot_control)/param/robot_base.yaml"/>
 
