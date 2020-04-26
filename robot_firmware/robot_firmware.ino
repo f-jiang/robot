@@ -2,40 +2,35 @@
 
 #include <Arduino.h>
 
-#include <Encoder.h>
-#include <PID_v1.h>
+// NOTE: currently this lib and the encoder code here rely on an unreleased fix for the arduino mbed core:
+// https://github.com/arduino/ArduinoCore-nRF528x-mbedos/pull/69
+#include <QuadratureEncoder.h>
 
-// TODO set and correct all names
-#define MOTOR_LEFT_EN 11    // EN_B
-#define MOTOR_RIGHT_EN 10   // EN_A
-#define MOTOR_IN_1 6
-#define MOTOR_IN_2 9
-#define MOTOR_IN_3 12
-#define MOTOR_IN_4 13
+#define DEBUG
 
-// ENC PINS
-#define ENC_LEFT_A  2
-#define ENC_LEFT_B  7
-#define ENC_RIGHT_A 3
-#define ENC_RIGHT_B 8
+#define MOTOR_LB    6   // left backwards
+#define MOTOR_LF    7   // left forward
+#define MOTOR_RB    8   // right backwards
+#define MOTOR_RF    9   // right forward
+#define MOTOR_SLEEP 10
+#define MOTOR_FAULT 11
 
-#define ENC_PULSES_PER_REVOLUTION 420
+#define ENC_LEFT_A  4
+#define ENC_LEFT_B  5
+#define ENC_RIGHT_A 2
+#define ENC_RIGHT_B 3
 
-struct PidController {
-    double input = 0;   // TODO private w/ getters
-    double output = 0;
-    double setpoint = 0;
-    PID controller = PID(&input, &output, &setpoint, 0, 0, 0, DIRECT);
-};
+#define ENC_PULSES_PER_REVOLUTION (51.45 * 12)
 
-Encoder encLeft(ENC_LEFT_A, ENC_LEFT_B);
-Encoder encRight(ENC_RIGHT_A, ENC_RIGHT_B);
+Encoders encLeft(ENC_LEFT_A, ENC_LEFT_B);
+Encoders encRight(ENC_RIGHT_A, ENC_RIGHT_B);
 unsigned long encLastTime;
 long positionLeft = 0;
 long positionRight = 0;
 
-PidController pidLeft;
-PidController pidRight;
+#ifdef DEBUG
+char buf[256];
+#endif
 
 // rad/s
 float angularVelocity(const long& oldPosition,
@@ -56,128 +51,61 @@ void setup()
 {
     Serial.begin(57600);
 
-    // MOTOR SETUP
-    pinMode(MOTOR_RIGHT_EN, OUTPUT);
-    pinMode(MOTOR_LEFT_EN, OUTPUT);
-    pinMode(MOTOR_IN_1, OUTPUT);
-    pinMode(MOTOR_IN_2, OUTPUT);
-    pinMode(MOTOR_IN_3, OUTPUT);
-    pinMode(MOTOR_IN_4, OUTPUT);
+    pinMode(MOTOR_SLEEP, OUTPUT);
+    pinMode(MOTOR_FAULT, INPUT);
+    pinMode(MOTOR_LB, OUTPUT);
+    pinMode(MOTOR_LF, OUTPUT);
+    pinMode(MOTOR_RB, OUTPUT);
+    pinMode(MOTOR_RF, OUTPUT);
 
-    pidLeft.input = 0;
-    pidLeft.setpoint = 0;
-    pidLeft.controller.SetMode(AUTOMATIC);
-    pidLeft.controller.SetOutputLimits(-255, 255);
-//    pidLeft.controller.SetTunings(5, .5, 0.05);
-//    pidLeft.controller.SetTunings(4, 10, 0.01);
-    pidLeft.controller.SetTunings(2, 16, 0.15);
+    // motors off
+    analogWrite(MOTOR_LB, 0);
+    analogWrite(MOTOR_LF, 0);
+    analogWrite(MOTOR_RB, 0);
+    analogWrite(MOTOR_RF, 0);
 
-    pidRight.input = 0;
-    pidRight.setpoint = 0;
-    pidRight.controller.SetMode(AUTOMATIC);
-    pidRight.controller.SetOutputLimits(-255, 255);
-    pidRight.controller.SetTunings(2, 16, 0.15);
+    // disable low-power sleep mode
+    digitalWrite(MOTOR_SLEEP, HIGH);
 
-    delay(3000);
+    delay(1000);
 }
 
 void loop()
 {
+    // TODO: motor control code (rcv msg from ROS)
+//    analogWrite(MOTOR_LB, 50);
+//    analogWrite(MOTOR_LF, 0);
+//    analogWrite(MOTOR_RB, 50);
+//    analogWrite(MOTOR_RF, 0);
+
     // ENCODER
     long newPositionLeft, newPositionRight;
     float angularVelocityLeft, angularVelocityRight;
-    newPositionLeft = encLeft.read();   // TODO mod?
-    newPositionRight = -encRight.read();    // correct direction
+    newPositionLeft = -encLeft.getEncoderCount();
+    newPositionRight = encRight.getEncoderCount();
     unsigned long encNow = millis();
     angularVelocityLeft = angularVelocity(positionLeft, newPositionLeft, encLastTime, encNow);
     angularVelocityRight = angularVelocity(positionRight, newPositionRight, encLastTime, encNow);
 #ifdef DEBUG
-    Serial.print("pos Left = ");
-    Serial.print(newPositionLeft);
-    Serial.print(", pos Right = ");
-    Serial.print(newPositionRight);
-    Serial.print(", ang vel Left (rad/s) = ");
-    Serial.print(angularVelocityLeft);
-    Serial.print(", ang vel Right (rad/s) = ");
-    Serial.print(angularVelocityRight);
-    Serial.print(", ang vel Left (deg/s) = ");
-    Serial.print(angularVelocityLeft * 180 / PI);
-    Serial.print(", ang vel Right (deg/s) = ");
-    Serial.print(angularVelocityRight * 180 / PI);
-    Serial.print(", ang vel Left (rpm) = ");
-    Serial.print(angularVelocityLeft / (2 * PI) * 60);
-    Serial.print(", ang vel Right (rpm) = ");
-    Serial.print(angularVelocityRight / (2 * PI) * 60);
-    Serial.println();
+    sprintf(buf,
+            "pos_l: %6d, e_l: %6d, theta_l (deg): %4d, omega_l (deg/s): %8.2f, n_l (rpm): %8.2f, "
+                "pos_r: %6d, e_r: %6d, theta_r (deg): %4d, omega_r (deg/s): %8.2f, n_r (rpm): %8.2f\n",
+            newPositionLeft,
+            encLeft.getEncoderErrorCount(),
+            static_cast<int>(angularPosition(newPositionLeft) * 180 / PI) % 360,
+            angularVelocityLeft * 180 / PI,
+            angularVelocityLeft / (2 * PI) * 60,
+            newPositionRight,
+            encRight.getEncoderErrorCount(),
+            static_cast<int>(angularPosition(newPositionRight) * 180 / PI) % 360,
+            angularVelocityRight * 180 / PI,
+            angularVelocityRight / (2 * PI) * 60);
+    Serial.print(buf);
 #endif
     encLastTime = encNow;
     positionLeft = newPositionLeft;
     positionRight = newPositionRight;
 
-#ifndef DEBUG
-    String buf;
-
-    // write wheels' ang. velocity and position
-    buf += angularVelocityLeft;
-    buf += ',';
-    buf += angularVelocityRight;
-    buf += ',';
-    buf += angularPosition(positionLeft);
-    buf += ',';
-    buf += angularPosition(positionRight);
-    buf += ';';
-    Serial.println(buf);
-
-    // read and set setpoints
-    if (Serial.available() > 0) {
-        buf.remove(0);
-        while (Serial.available() > 0) {
-            buf += (char) Serial.read();
-            delay(10);
-        }
-
-        pidLeft.setpoint = buf.toDouble();
-        buf.remove(0, buf.indexOf(',') + 1);
-        pidRight.setpoint = buf.toDouble();
-    }
-#else
-#define RPM_TO_RAD_S(val)   ((val) / 60.0f * 2 * PI)
-    pidLeft.setpoint = RPM_TO_RAD_S(600);
-    pidRight.setpoint = RPM_TO_RAD_S(600);
-#undef RPM_TO_RAD_S
-#endif
-    pidLeft.input = angularVelocityLeft;
-    pidRight.input = angularVelocityRight;
-    pidLeft.controller.Compute();
-    pidRight.controller.Compute();
-
-    // left motor
-    int leftMotorValue = abs(pidLeft.output);
-    // forward
-    if (pidLeft.output > 0) {
-        digitalWrite(MOTOR_IN_1, LOW);
-        digitalWrite(MOTOR_IN_2, HIGH);
-    // backward
-    } else {
-        digitalWrite(MOTOR_IN_1, HIGH);
-        digitalWrite(MOTOR_IN_2, LOW);
-    }
-    // TODO deadzone
-    analogWrite(MOTOR_LEFT_EN, leftMotorValue);
-
-    // right motor
-    int rightMotorValue = abs(pidRight.output);
-    // forward
-    if (pidRight.output > 0) {
-        digitalWrite(MOTOR_IN_3, HIGH);
-        digitalWrite(MOTOR_IN_4, LOW);
-    // backward
-    } else {
-        digitalWrite(MOTOR_IN_3, LOW);
-        digitalWrite(MOTOR_IN_4, HIGH);
-    }
-    analogWrite(MOTOR_RIGHT_EN, rightMotorValue);
-
-    delay(20);
+    delay(1);
 }
 
