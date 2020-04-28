@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
-  serial
+  rosserial_arduino
 )
 
 find_package(robot_constants REQUIRED)
@@ -20,7 +20,7 @@ find_package(robot_constants REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES base
- CATKIN_DEPENDS controller_manager hardware_interface roscpp sensor_msgs std_msgs serial
+ CATKIN_DEPENDS controller_manager hardware_interface roscpp sensor_msgs std_msgs rosserial_arduino
 #  DEPENDS system_lib
 )
 
@@ -32,7 +32,4 @@ include_directories(
 
 add_executable(base_node src/base.cpp)
 target_link_libraries(base_node ${catkin_LIBRARIES})
-
-add_executable(serial_node src/serial.cpp)
-target_link_libraries(serial_node ${catkin_LIBRARIES})
 
