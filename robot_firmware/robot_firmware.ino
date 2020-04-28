@@ -6,7 +6,7 @@
 // https://github.com/arduino/ArduinoCore-nRF528x-mbedos/pull/69
 #include <QuadratureEncoder.h>
 
-#define DEBUG
+// #define DEBUG
 
 #define MOTOR_LB    6   // left backwards
 #define MOTOR_LF    7   // left forward
