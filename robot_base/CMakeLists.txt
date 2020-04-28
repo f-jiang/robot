@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   rosserial_arduino
+  pid
 )
 
 find_package(robot_constants REQUIRED)
@@ -20,7 +21,13 @@ find_package(robot_constants REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES base
- CATKIN_DEPENDS controller_manager hardware_interface roscpp sensor_msgs std_msgs rosserial_arduino
+ CATKIN_DEPENDS controller_manager
+                hardware_interface
+                roscpp
+                sensor_msgs
+                std_msgs
+                rosserial_arduino
+                pid
 #  DEPENDS system_lib
 )
 

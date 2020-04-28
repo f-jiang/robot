@@ -12,4 +12,26 @@
     <node name="base_node"
           pkg="robot_base"
           type="base_node"/>
+
+    <node name="controller" pkg="pid" type="controller" ns="left_wheel" output="screen">
+        <param name="Kp" value="5.0"/>
+        <param name="Ki" value="0.0"/>
+        <param name="Kd" value="0.1"/>
+        <param name="upper_limit" value="255"/>
+        <param name="lower_limit" value="-255"/>
+        <param name="windup_limit" value="10"/>
+        <param name="max_loop_frequency" value="100.0"/>
+        <param name="min_loop_frequency" value="100.0"/>
+     </node>
+
+    <node name="controller" pkg="pid" type="controller" ns="right_wheel" output="screen">
+        <param name="Kp" value="5.0"/>
+        <param name="Ki" value="0.0"/>
+        <param name="Kd" value="0.1"/>
+        <param name="upper_limit" value="255"/>
+        <param name="lower_limit" value="-255"/>
+        <param name="windup_limit" value="10"/>
+        <param name="max_loop_frequency" value="100.0"/>
+        <param name="min_loop_frequency" value="100.0"/>
+     </node>
 </launch>
