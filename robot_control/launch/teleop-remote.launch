@@ -1,6 +1,4 @@
 <launch>
-    <arg name="drive_controller_name" value="base_controller"/>
-
     <node pkg="joy"
           name="joy_node"
           type="joy_node"
@@ -15,7 +13,7 @@
         <!-- mappings for x360 controller -->
         <param name="~axis_linear" value="1" type="int"/>
         <param name="~axis_angular" value="3" type="int"/>
-        <remap from="cmd_vel" to="/$(arg drive_controller_name)/cmd_vel"/>
+<!--         TODO remap cmd_vel -->
     </node>
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_control)/rviz/teleop.rviz"/>

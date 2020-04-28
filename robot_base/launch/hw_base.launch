@@ -34,4 +34,12 @@
         <param name="max_loop_frequency" value="100.0"/>
         <param name="min_loop_frequency" value="100.0"/>
      </node>
+
+    <rosparam command="load" file="$(find robot_base)/param/robot_base.yaml"/>
+
+    <node pkg="controller_manager"
+          name="controller_spawner"
+          type="spawner"
+          output="screen"
+          args="base_controller"/>
 </launch>
