@@ -49,7 +49,7 @@ float angularPosition(const long& position) {
 
 void setup()
 {
-    Serial.begin(57600);
+    Serial.begin(115200);
 
     pinMode(MOTOR_SLEEP, OUTPUT);
     pinMode(MOTOR_FAULT, INPUT);
