@@ -1,3 +1,6 @@
+#include <ros.h>
+#include <std_msgs/Float32.h>
+
 #include <stdio.h>
 
 #include <Arduino.h>
@@ -30,6 +33,39 @@ long positionRight = 0;
 
 #ifdef DEBUG
 char buf[256];
+#else
+// TODO integrate this into catkin so that robot_constants can be used here
+
+ros::NodeHandle nh;
+
+std_msgs::Float32 encMsg;
+ros::Publisher pubLeftPos("/left_wheel/pos", &encMsg);
+ros::Publisher pubRightPos("/right_wheel/pos", &encMsg);
+ros::Publisher pubLeftVel("/left_wheel/vel", &encMsg);
+ros::Publisher pubRightVel("/right_wheel/vel", &encMsg);
+
+void leftEffCallback(const std_msgs::Float32& msg);
+void rightEffCallback(const std_msgs::Float32& msg);
+ros::Subscriber<std_msgs::Float32> subLeftEff("/left_wheel/eff", &leftEffCallback);
+ros::Subscriber<std_msgs::Float32> subRightEff("/right_wheel/eff", &rightEffCallback);
+
+void setMotor(byte fwdPin, byte bkdPin, short val) {
+    if (val > 0) {
+        analogWrite(fwdPin, val);
+        analogWrite(bkdPin, 0);
+    } else {
+        analogWrite(fwdPin, 0);
+        analogWrite(bkdPin, val);
+    }
+}
+
+void leftEffCallback(const std_msgs::Float32& msg) {
+    setMotor(MOTOR_LF, MOTOR_LB, static_cast<short>(round(msg.data)));
+}
+
+void rightEffCallback(const std_msgs::Float32& msg) {
+    setMotor(MOTOR_RF, MOTOR_RB, static_cast<short>(round(msg.data)));
+}
 #endif
 
 // rad/s
@@ -67,18 +103,23 @@ void setup()
     // disable low-power sleep mode
     digitalWrite(MOTOR_SLEEP, HIGH);
 
+#ifndef DEBUG
+    nh.initNode();
+
+    nh.advertise(pubLeftPos);
+    nh.advertise(pubRightPos);
+    nh.advertise(pubLeftVel);
+    nh.advertise(pubRightVel);
+
+    nh.subscribe(subLeftEff);
+    nh.subscribe(subRightEff);
+#endif
+
     delay(1000);
 }
 
 void loop()
 {
-    // TODO: motor control code (rcv msg from ROS)
-//    analogWrite(MOTOR_LB, 50);
-//    analogWrite(MOTOR_LF, 0);
-//    analogWrite(MOTOR_RB, 50);
-//    analogWrite(MOTOR_RF, 0);
-
-    // ENCODER
     long newPositionLeft, newPositionRight;
     float angularVelocityLeft, angularVelocityRight;
     newPositionLeft = -encLeft.getEncoderCount();
@@ -86,6 +127,7 @@ void loop()
     unsigned long encNow = millis();
     angularVelocityLeft = angularVelocity(positionLeft, newPositionLeft, encLastTime, encNow);
     angularVelocityRight = angularVelocity(positionRight, newPositionRight, encLastTime, encNow);
+
 #ifdef DEBUG
     sprintf(buf,
             "pos_l: %6d, e_l: %6d, theta_l (deg): %4d, omega_l (deg/s): %8.2f, n_l (rpm): %8.2f, "
@@ -102,10 +144,26 @@ void loop()
             angularVelocityRight / (2 * PI) * 60);
     Serial.print(buf);
 #endif
+
     encLastTime = encNow;
     positionLeft = newPositionLeft;
     positionRight = newPositionRight;
 
-    delay(1);
+#ifndef DEBUG
+    // TODO rpm, deg/s, rad/s?
+    encMsg.data = 0;
+    pubLeftPos.publish(&encMsg);
+    encMsg.data = 0;
+    pubRightPos.publish(&encMsg);
+
+    encMsg.data = 0;
+    pubLeftVel.publish(&encMsg);
+    encMsg.data = 0;
+    pubRightVel.publish(&encMsg);
+
+    nh.spinOnce();
+#endif
+
+    delay(1000 / 100);   // TODO to maintain synchronization, keep this node and base_node spinning at same frequency
 }
 

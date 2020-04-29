@@ -22,6 +22,10 @@
         <param name="windup_limit" value="10"/>
         <param name="max_loop_frequency" value="100.0"/>
         <param name="min_loop_frequency" value="100.0"/>
+
+        <!-- topic_from_controller = control_effort -->
+        <!-- setpoint_topic = setpoint -->
+        <param name="topic_from_plant" value="vel"/>
      </node>
 
     <node name="pid_node" pkg="pid" type="controller" ns="right_wheel" output="screen">
@@ -33,6 +37,10 @@
         <param name="windup_limit" value="10"/>
         <param name="max_loop_frequency" value="100.0"/>
         <param name="min_loop_frequency" value="100.0"/>
+
+        <!-- topic_from_controller = control_effort -->
+        <!-- setpoint_topic = setpoint -->
+        <param name="topic_from_plant" value="vel"/>
      </node>
 
     <rosparam command="load" file="$(find robot_base)/param/robot_base.yaml"/>
