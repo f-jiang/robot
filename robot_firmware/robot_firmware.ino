@@ -85,7 +85,9 @@ float angularPosition(const long& position) {
 
 void setup()
 {
+#ifdef DEBUG
     Serial.begin(115200);
+#endif
 
     pinMode(MOTOR_SLEEP, OUTPUT);
     pinMode(MOTOR_FAULT, INPUT);
