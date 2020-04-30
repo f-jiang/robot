@@ -16,6 +16,11 @@
 #include <robot_constants.h>
 
 class Robot : public hardware_interface::RobotHW {
+private:
+    void read(double& dest, const std_msgs::Float64& msg) {
+        dest = msg.data;
+    }
+
 public:
     static const size_t kNumJoints = 2;
 
@@ -63,10 +68,49 @@ public:
         registerInterface(&vel_jnt_interface_);
 
         // Initialize publishers and subscribers
+        // publishers
         left_wheel_setpoint_pub_ = nh.advertise<std_msgs::Float64>(
                 robot_constants::topics::kLeftWheelSetpoint, 1);
         right_wheel_setpoint_pub_ = nh.advertise<std_msgs::Float64>(
                 robot_constants::topics::kRightWheelSetpoint, 1);
+
+        boost::function<void (const std_msgs::Float64&)> cb;
+
+        // wheel position subscribers
+        cb = boost::bind(&Robot::read, this, boost::ref(pos[kLeftJointIdx]), _1);
+        left_wheel_pos_sub_ = nh.subscribe<std_msgs::Float64>(
+                robot_constants::topics::kLeftWheelPosition,
+                kSubQueueSize,
+                cb);
+        cb = boost::bind(&Robot::read, this, boost::ref(pos[kRightJointIdx]), _1);
+        right_wheel_pos_sub_ = nh.subscribe<std_msgs::Float64>(
+                robot_constants::topics::kRightWheelPosition,
+                kSubQueueSize,
+                cb);
+
+        // wheel velocity subscribers
+        cb = boost::bind(&Robot::read, this, boost::ref(vel[kLeftJointIdx]), _1);
+        left_wheel_vel_sub_ = nh.subscribe<std_msgs::Float64>(
+                robot_constants::topics::kLeftWheelVelocity,
+                kSubQueueSize,
+                cb);
+        cb = boost::bind(&Robot::read, this, boost::ref(vel[kRightJointIdx]), _1);
+        right_wheel_vel_sub_ = nh.subscribe<std_msgs::Float64>(
+                robot_constants::topics::kRightWheelVelocity,
+                kSubQueueSize,
+                cb);
+
+        // wheel control effort subscribers
+        cb = boost::bind(&Robot::read, this, boost::ref(eff[kLeftJointIdx]), _1);
+        left_wheel_eff_sub_ = nh.subscribe<std_msgs::Float64>(
+                robot_constants::topics::kLeftWheelPosition,
+                kSubQueueSize,
+                cb);
+        cb = boost::bind(&Robot::read, this, boost::ref(eff[kRightJointIdx]), _1);
+        right_wheel_eff_sub_ = nh.subscribe<std_msgs::Float64>(
+                robot_constants::topics::kRightWheelPosition,
+                kSubQueueSize,
+                cb);
     }
 
 //    void LimitDifferentialSpeed(double &diff_speed_left, double &diff_speed_right) {
@@ -93,46 +137,12 @@ public:
         right_wheel_setpoint_pub_.publish(right_wheel_setpoint_msg);
     }
 
-    void read_msg(const std::string& topic,
-                  const ros::Duration& timeout_duration,
-                  double default_val,
-                  double& dest) {
-        auto msg_ptr = ros::topic::waitForMessage<std_msgs::Float64>(
-                topic, timeout_duration);
-        dest = msg_ptr ? msg_ptr->data : 0;
-    }
-
-    // TODO synchronize with fw_node (same period, but may have phase lag)
-    // FIXME currently this function is taking much longer than it should given the timeout_ value
-    // current timeout behaviour: if no msg received, assume 0 and carry on with remaining read() and write()
-    void read(const ros::Duration& /*period*/) {
-        ros::Duration timeout_duration(timeout_);
-
-        read_msg(robot_constants::topics::kLeftWheelPosition, timeout_duration, 0, pos[kLeftJointIdx]);
-        // $(find robot_base)/launch/hw_base.launch
-        read_msg(robot_constants::topics::kLeftWheelVelocity, timeout_duration, 0, vel[kLeftJointIdx]);
-        read_msg(robot_constants::topics::kLeftWheelControlEffort, timeout_duration, 0, eff[kLeftJointIdx]);
-
-        read_msg(robot_constants::topics::kRightWheelPosition, timeout_duration, 0, pos[kRightJointIdx]);
-        // $(find robot_base)/launch/hw_base.launch
-        read_msg(robot_constants::topics::kRightWheelVelocity, timeout_duration, 0, vel[kRightJointIdx]);
-        read_msg(robot_constants::topics::kRightWheelControlEffort, timeout_duration, 0, eff[kRightJointIdx]);
-    }
-
-    ros::Time get_time() {
-        prev_update_time_ = cur_update_time_;
-        cur_update_time_ = ros::Time::now();
-        return cur_update_time_;
-    }
-
-    ros::Duration get_period() {
-        return cur_update_time_ - prev_update_time_;
-    }
-
     ros::NodeHandle nh;
     ros::NodeHandle private_nh;
 
 private:
+    const size_t kSubQueueSize = 10;
+
     const size_t kLeftJointIdx = 0;
     const size_t kRightJointIdx = 1;
 
@@ -155,6 +165,14 @@ private:
     ros::Publisher left_wheel_setpoint_pub_;
     ros::Publisher right_wheel_setpoint_pub_;
 
+    ros::Subscriber left_wheel_pos_sub_;
+    ros::Subscriber right_wheel_pos_sub_;
+
+    ros::Subscriber left_wheel_vel_sub_;
+    ros::Subscriber right_wheel_vel_sub_;
+
+    ros::Subscriber left_wheel_eff_sub_;
+    ros::Subscriber right_wheel_eff_sub_;
 };  // class
 
 const char* Robot::kMaxSpeedParam = "max_speed_param";
@@ -168,7 +186,7 @@ void controlLoop(Robot& hw,
     ros::Duration elapsed(elapsed_time.count());
     last_time = current_time;
 
-    hw.read(elapsed);
+    // read() happens thru sub callbacks
     cm.update(ros::Time::now(), elapsed);
     hw.write();
 }
