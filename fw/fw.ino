@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 
 #include <stdio.h>
 
@@ -38,22 +38,25 @@ char buf[256];
 
 ros::NodeHandle nh;
 
-std_msgs::Float32 leftPosMsg;
+std_msgs::Float64 leftPosMsg;
 ros::Publisher pubLeftPos("/left_wheel/pos", &leftPosMsg);
 
-std_msgs::Float32 rightPosMsg;
+std_msgs::Float64 rightPosMsg;
 ros::Publisher pubRightPos("/right_wheel/pos", &rightPosMsg);
 
-std_msgs::Float32 leftVelMsg;
+std_msgs::Float64 leftVelMsg;
 ros::Publisher pubLeftVel("/left_wheel/vel", &leftVelMsg);
 
-std_msgs::Float32 rightVelMsg;
+std_msgs::Float64 rightVelMsg;
 ros::Publisher pubRightVel("/right_wheel/vel", &rightVelMsg);
 
-void leftEffCallback(const std_msgs::Float32& msg);
-void rightEffCallback(const std_msgs::Float32& msg);
-ros::Subscriber<std_msgs::Float32> subLeftEff("/left_wheel/eff", &leftEffCallback);
-ros::Subscriber<std_msgs::Float32> subRightEff("/right_wheel/eff", &rightEffCallback);
+void leftEffCallback(const std_msgs::Float64& msg);
+void rightEffCallback(const std_msgs::Float64& msg);
+ros::Subscriber<std_msgs::Float64> subLeftEff("/left_wheel/control_effort", &leftEffCallback);
+ros::Subscriber<std_msgs::Float64> subRightEff("/right_wheel/control_effort", &rightEffCallback);
+
+int controlFrequency = 100;
+int loopDelay = 10;
 
 void setMotor(byte fwdPin, byte bkdPin, short val) {
     if (val > 0) {
@@ -65,11 +68,11 @@ void setMotor(byte fwdPin, byte bkdPin, short val) {
     }
 }
 
-void leftEffCallback(const std_msgs::Float32& msg) {
+void leftEffCallback(const std_msgs::Float64& msg) {
     setMotor(MOTOR_LF, MOTOR_LB, static_cast<short>(round(msg.data)));
 }
 
-void rightEffCallback(const std_msgs::Float32& msg) {
+void rightEffCallback(const std_msgs::Float64& msg) {
     setMotor(MOTOR_RF, MOTOR_RB, static_cast<short>(round(msg.data)));
 }
 #endif
@@ -80,13 +83,15 @@ float angularVelocity(const long& oldPosition,
                       const unsigned long& oldTime,
                       const unsigned long& newTime) {
     return (newPosition - oldPosition)
-           / static_cast<float>(ENC_PULSES_PER_REVOLUTION)
+           / ENC_PULSES_PER_REVOLUTION
            * (PI * 2)
            / ((newTime - oldTime) / 1000.0f);
 }
 
 float angularPosition(const long& position) {
-    return (position / static_cast<float>(ENC_PULSES_PER_REVOLUTION)) * (PI * 2);
+    return (position - (position / ENC_PULSES_PER_REVOLUTION) * ENC_PULSES_PER_REVOLUTION)
+           / ENC_PULSES_PER_REVOLUTION
+           * (PI * 2);
 }
 
 void setup()
@@ -114,6 +119,10 @@ void setup()
 #ifndef DEBUG
     nh.initNode();
 
+    // TODO robot_constants::params::kControlFrequency
+    nh.getParam("/control_frequency", &controlFrequency);
+    loopDelay = round(1000 / static_cast<double>(controlFrequency));
+
     nh.advertise(pubLeftPos);
     nh.advertise(pubRightPos);
     nh.advertise(pubLeftVel);
@@ -129,12 +138,15 @@ void setup()
 void loop()
 {
     long newPositionLeft, newPositionRight;
+    float angularPositionLeft, angularPositionRight;
     float angularVelocityLeft, angularVelocityRight;
     newPositionLeft = -encLeft.getEncoderCount();
     newPositionRight = encRight.getEncoderCount();
     unsigned long encNow = millis();
     angularVelocityLeft = angularVelocity(positionLeft, newPositionLeft, encLastTime, encNow);
     angularVelocityRight = angularVelocity(positionRight, newPositionRight, encLastTime, encNow);
+    angularPositionLeft = angularPosition(newPositionLeft);
+    angularPositionRight = angularPosition(newPositionRight);
 
 #ifdef DEBUG
     sprintf(buf,
@@ -142,12 +154,12 @@ void loop()
                 "pos_r: %6d, e_r: %6d, theta_r (deg): %4d, omega_r (deg/s): %8.2f, n_r (rpm): %8.2f\n",
             newPositionLeft,
             encLeft.getEncoderErrorCount(),
-            static_cast<int>(angularPosition(newPositionLeft) * 180 / PI) % 360,
+            angularPositionLeft * 180 / PI,
             angularVelocityLeft * 180 / PI,
             angularVelocityLeft / (2 * PI) * 60,
             newPositionRight,
             encRight.getEncoderErrorCount(),
-            static_cast<int>(angularPosition(newPositionRight) * 180 / PI) % 360,
+            angularPositionRight * 180 / PI,
             angularVelocityRight * 180 / PI,
             angularVelocityRight / (2 * PI) * 60);
     Serial.print(buf);
@@ -158,20 +170,19 @@ void loop()
     positionRight = newPositionRight;
 
 #ifndef DEBUG
-    // TODO rpm, deg/s, rad/s?
-    leftPosMsg.data = 0;
+    leftPosMsg.data = angularPositionLeft;
     pubLeftPos.publish(&leftPosMsg);
-    rightPosMsg.data = 0;
+    rightPosMsg.data = angularPositionRight;
     pubRightPos.publish(&rightPosMsg);
 
-    leftVelMsg.data = 0;
+    leftVelMsg.data = angularVelocityLeft;
     pubLeftVel.publish(&leftVelMsg);
-    rightVelMsg.data = 0;
+    rightVelMsg.data = angularVelocityRight;
     pubRightVel.publish(&rightVelMsg);
 
     nh.spinOnce();
 #endif
 
-    delay(1000 / 100);   // TODO to maintain synchronization, keep this node and base_node spinning at same frequency
+    delay(loopDelay);
 }
 

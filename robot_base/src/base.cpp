@@ -13,41 +13,52 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
 
-#include <robot_constants/topics.h>
-#include <robot_constants/nodes.h>
+#include <robot_constants.h>
 
 class Robot : public hardware_interface::RobotHW {
 public:
-    Robot() : private_nh("~") {
-//        private_nh.param<double>("max_speed", max_speed_, 1.0);
+    static const size_t kNumJoints = 2;
 
-        std::fill_n(cmd, NUM_JOINTS, 0.0f);
-        std::fill_n(pos, NUM_JOINTS, 0.0f);
-        std::fill_n(vel, NUM_JOINTS, 0.0f);
-        std::fill_n(eff, NUM_JOINTS, 0.0f);
-        std::fill_n(wheel_angle_, NUM_JOINTS, 0.0f);
+    static const char* kMaxSpeedParam;
+    static const char* kTimeoutParam;
+
+    // $(find robot_base)/param/robot_base.yaml
+    const std::string kLeftJointName = "left_wheel_joint";
+    const std::string kRightJointName = "right_wheel_joint";
+
+    Robot() : private_nh("~") {
+        ros::param::get(robot_constants::params::kControlFrequency, control_frequency_);
+
+//        private_nh.param<double>(MAX_SPEED_PARAM, max_speed_, 1.0);
+        private_nh.param<double>(kTimeoutParam,  timeout_,
+                                 1 / (static_cast<double>(control_frequency_) /** kNumMsgsToRead*/));
+
+        std::fill_n(cmd, kNumJoints, 0.0f);
+        std::fill_n(pos, kNumJoints, 0.0f);
+        std::fill_n(vel, kNumJoints, 0.0f);
+        std::fill_n(eff, kNumJoints, 0.0f);
 
         hardware_interface::JointStateHandle left_joint_state_handle(
-                LEFT_JOINT_NAME,
-                &pos[LEFT_JOINT_IDX],
-                &vel[LEFT_JOINT_IDX],
-                &eff[LEFT_JOINT_IDX]);
+                kLeftJointName,
+                &pos[kLeftJointIdx],
+                &vel[kLeftJointIdx],
+                &eff[kLeftJointIdx]);
         jnt_state_interface_.registerHandle(left_joint_state_handle);
         hardware_interface::JointStateHandle right_joint_state_handle(
-                RIGHT_JOINT_NAME,
-                &pos[RIGHT_JOINT_IDX],
-                &vel[RIGHT_JOINT_IDX],
-                &eff[RIGHT_JOINT_IDX]);
+                kRightJointName,
+                &pos[kRightJointIdx],
+                &vel[kRightJointIdx],
+                &eff[kRightJointIdx]);
         jnt_state_interface_.registerHandle(right_joint_state_handle);
         registerInterface(&jnt_state_interface_);
 
         hardware_interface::JointHandle left_joint_vel_handle(
-                jnt_state_interface_.getHandle(LEFT_JOINT_NAME),
-                &cmd[LEFT_JOINT_IDX]);
+                jnt_state_interface_.getHandle(kLeftJointName),
+                &cmd[kLeftJointIdx]);
         vel_jnt_interface_.registerHandle(left_joint_vel_handle);
         hardware_interface::JointHandle right_joint_vel_handle(
-                jnt_state_interface_.getHandle(RIGHT_JOINT_NAME),
-                &cmd[RIGHT_JOINT_IDX]);
+                jnt_state_interface_.getHandle(kRightJointName),
+                &cmd[kRightJointIdx]);
         vel_jnt_interface_.registerHandle(right_joint_vel_handle);
         registerInterface(&vel_jnt_interface_);
 
@@ -68,8 +79,8 @@ public:
 
     void write() {
         // angular velocity
-        double cmd_left = cmd[LEFT_JOINT_IDX];
-        double cmd_right = cmd[RIGHT_JOINT_IDX];
+        double cmd_left = cmd[kLeftJointIdx];
+        double cmd_right = cmd[kRightJointIdx];
 
 //      LimitDifferentialSpeed(cmd_left, cmd_right);
 
@@ -82,23 +93,30 @@ public:
         right_wheel_setpoint_pub_.publish(right_wheel_setpoint_msg);
     }
 
-    // TODO synchronize with fw_node
-    void read(const ros::Duration& /*period*/) {
-        pos[LEFT_JOINT_IDX] = ros::topic::waitForMessage<std_msgs::Float64>(
-                robot_constants::topics::kLeftWheelPosition)->data;
-        // $(find robot_base)/launch/hw_base.launch
-        vel[LEFT_JOINT_IDX] = ros::topic::waitForMessage<std_msgs::Float64>(
-                robot_constants::topics::kLeftWheelVelocity)->data;
-        eff[LEFT_JOINT_IDX] = ros::topic::waitForMessage<std_msgs::Float64>(
-                robot_constants::topics::kLeftWheelControlEffort)->data;
+    void read_msg(const std::string& topic,
+                  const ros::Duration& timeout_duration,
+                  double default_val,
+                  double& dest) {
+        auto msg_ptr = ros::topic::waitForMessage<std_msgs::Float64>(
+                topic, timeout_duration);
+        dest = msg_ptr ? msg_ptr->data : 0;
+    }
 
-        pos[RIGHT_JOINT_IDX] = ros::topic::waitForMessage<std_msgs::Float64>(
-                robot_constants::topics::kRightWheelPosition)->data;
+    // TODO synchronize with fw_node (same period, but may have phase lag)
+    // FIXME currently this function is taking much longer than it should given the timeout_ value
+    // current timeout behaviour: if no msg received, assume 0 and carry on with remaining read() and write()
+    void read(const ros::Duration& /*period*/) {
+        ros::Duration timeout_duration(timeout_);
+
+        read_msg(robot_constants::topics::kLeftWheelPosition, timeout_duration, 0, pos[kLeftJointIdx]);
         // $(find robot_base)/launch/hw_base.launch
-        vel[RIGHT_JOINT_IDX] = ros::topic::waitForMessage<std_msgs::Float64>(
-                robot_constants::topics::kRightWheelVelocity)->data;
-        eff[RIGHT_JOINT_IDX] = ros::topic::waitForMessage<std_msgs::Float64>(
-                robot_constants::topics::kRightWheelControlEffort)->data;
+        read_msg(robot_constants::topics::kLeftWheelVelocity, timeout_duration, 0, vel[kLeftJointIdx]);
+        read_msg(robot_constants::topics::kLeftWheelControlEffort, timeout_duration, 0, eff[kLeftJointIdx]);
+
+        read_msg(robot_constants::topics::kRightWheelPosition, timeout_duration, 0, pos[kRightJointIdx]);
+        // $(find robot_base)/launch/hw_base.launch
+        read_msg(robot_constants::topics::kRightWheelVelocity, timeout_duration, 0, vel[kRightJointIdx]);
+        read_msg(robot_constants::topics::kRightWheelControlEffort, timeout_duration, 0, eff[kRightJointIdx]);
     }
 
     ros::Time get_time() {
@@ -115,24 +133,21 @@ public:
     ros::NodeHandle private_nh;
 
 private:
-    static const size_t NUM_JOINTS = 2;
+    const size_t kLeftJointIdx = 0;
+    const size_t kRightJointIdx = 1;
 
-    // $(find robot_base)/param/robot_base.yaml
-    const std::string LEFT_JOINT_NAME = "left_wheel_joint";
-    const std::string RIGHT_JOINT_NAME = "right_wheel_joint";
-
-    const size_t LEFT_JOINT_IDX = 0;
-    const size_t RIGHT_JOINT_IDX = 1;
+//    const size_t kNumMsgsToRead = 6;
 
     hardware_interface::JointStateInterface jnt_state_interface_;
     hardware_interface::VelocityJointInterface vel_jnt_interface_;
-    double cmd[NUM_JOINTS];
-    double pos[NUM_JOINTS];
-    double vel[NUM_JOINTS];
-    double eff[NUM_JOINTS];
+    double cmd[kNumJoints]; // rad/s
+    double pos[kNumJoints]; // rad
+    double vel[kNumJoints]; // rad/s
+    double eff[kNumJoints]; // [-255, 255]
 
 //    double max_speed_;
-    double wheel_angle_[NUM_JOINTS];
+    int control_frequency_;
+    double timeout_;
 
     ros::Time cur_update_time_;
     ros::Time prev_update_time_;
@@ -141,6 +156,9 @@ private:
     ros::Publisher right_wheel_setpoint_pub_;
 
 };  // class
+
+const char* Robot::kMaxSpeedParam = "max_speed_param";
+const char* Robot::kTimeoutParam = "timeout";
 
 void controlLoop(Robot& hw,
                  controller_manager::ControllerManager& cm,
@@ -158,17 +176,20 @@ void controlLoop(Robot& hw,
 int main(int argc, char** argv) {
     ros::init(argc, argv, robot_constants::nodes::kBaseNode);
 
+    if (!ros::param::has(robot_constants::params::kControlFrequency)) {
+        ros::param::set(robot_constants::params::kControlFrequency, 100);
+    }
+
     Robot hw;
     controller_manager::ControllerManager cm(&hw, hw.nh);
-
-    double control_frequency;
-    hw.private_nh.param<double>("control_frequency", control_frequency, 100);
 
     ros::CallbackQueue my_robot_queue;
     ros::AsyncSpinner my_robot_spinner(1, &my_robot_queue);
     std::chrono::system_clock::time_point last_time = std::chrono::system_clock::now();
+    int control_frequency;
+    ros::param::get(robot_constants::params::kControlFrequency, control_frequency);
     ros::TimerOptions control_timer(
-            ros::Duration(1 / control_frequency), 
+            ros::Duration(1 / static_cast<double>(control_frequency)),
             std::bind(controlLoop, std::ref(hw), std::ref(cm), std::ref(last_time)), 
             &my_robot_queue);
     ros::Timer control_loop = hw.nh.createTimer(control_timer);
