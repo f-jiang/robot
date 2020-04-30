@@ -38,11 +38,17 @@ char buf[256];
 
 ros::NodeHandle nh;
 
-std_msgs::Float32 encMsg;
-ros::Publisher pubLeftPos("/left_wheel/pos", &encMsg);
-ros::Publisher pubRightPos("/right_wheel/pos", &encMsg);
-ros::Publisher pubLeftVel("/left_wheel/vel", &encMsg);
-ros::Publisher pubRightVel("/right_wheel/vel", &encMsg);
+std_msgs::Float32 leftPosMsg;
+ros::Publisher pubLeftPos("/left_wheel/pos", &leftPosMsg);
+
+std_msgs::Float32 rightPosMsg;
+ros::Publisher pubRightPos("/right_wheel/pos", &rightPosMsg);
+
+std_msgs::Float32 leftVelMsg;
+ros::Publisher pubLeftVel("/left_wheel/vel", &leftVelMsg);
+
+std_msgs::Float32 rightVelMsg;
+ros::Publisher pubRightVel("/right_wheel/vel", &rightVelMsg);
 
 void leftEffCallback(const std_msgs::Float32& msg);
 void rightEffCallback(const std_msgs::Float32& msg);
@@ -153,15 +159,15 @@ void loop()
 
 #ifndef DEBUG
     // TODO rpm, deg/s, rad/s?
-    encMsg.data = 0;
-    pubLeftPos.publish(&encMsg);
-    encMsg.data = 0;
-    pubRightPos.publish(&encMsg);
+    leftPosMsg.data = 0;
+    pubLeftPos.publish(&leftPosMsg);
+    rightPosMsg.data = 0;
+    pubRightPos.publish(&rightPosMsg);
 
-    encMsg.data = 0;
-    pubLeftVel.publish(&encMsg);
-    encMsg.data = 0;
-    pubRightVel.publish(&encMsg);
+    leftVelMsg.data = 0;
+    pubLeftVel.publish(&leftVelMsg);
+    rightVelMsg.data = 0;
+    pubRightVel.publish(&rightVelMsg);
 
     nh.spinOnce();
 #endif
