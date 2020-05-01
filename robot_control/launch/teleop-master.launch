@@ -1,4 +1,4 @@
 <launch>
-    <include file="$(find robot_base)/launch/hw_base.launch"/>
+    <include file="$(find robot_base)/launch/hw_control.launch"/>
     <include file="$(find robot_base)/launch/sensors_base.launch"/>
 </launch>

@@ -7,10 +7,12 @@ find_package(catkin REQUIRED COMPONENTS
   controller_manager
   hardware_interface
   roscpp
+  rospy
   sensor_msgs
   std_msgs
   rosserial_arduino
   pid
+  dynamic_reconfigure
 )
 
 find_package(robot_constants REQUIRED)
@@ -18,16 +20,23 @@ find_package(robot_constants REQUIRED)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+generate_dynamic_reconfigure_options(
+  cfg/Setpoint.cfg
+  #...
+)
+
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES base
  CATKIN_DEPENDS controller_manager
                 hardware_interface
                 roscpp
+                rospy
                 sensor_msgs
                 std_msgs
                 rosserial_arduino
                 pid
+                dynamic_reconfigure
 #  DEPENDS system_lib
 )
 
