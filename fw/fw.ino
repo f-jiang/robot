@@ -60,21 +60,22 @@ ros::Subscriber<std_msgs::Float64> subRightEff("/right_wheel/control_effort", &r
 int controlFrequency = 100;
 
 void setMotor(byte fwdPin, byte bkdPin, short val) {
+    short absVal = abs(val);
     if (val > 0) {
-        analogWrite(fwdPin, val);
+        analogWrite(fwdPin, absVal);
         analogWrite(bkdPin, 0);
     } else {
         analogWrite(fwdPin, 0);
-        analogWrite(bkdPin, val);
+        analogWrite(bkdPin, absVal);
     }
 }
 
 void leftEffCallback(const std_msgs::Float64& msg) {
-    setMotor(MOTOR_LF, MOTOR_LB, static_cast<short>(round(msg.data)));
+    setMotor(MOTOR_LF, MOTOR_LB, round(msg.data));
 }
 
 void rightEffCallback(const std_msgs::Float64& msg) {
-    setMotor(MOTOR_RF, MOTOR_RB, static_cast<short>(round(msg.data)));
+    setMotor(MOTOR_RF, MOTOR_RB, round(msg.data));
 }
 #endif
 
