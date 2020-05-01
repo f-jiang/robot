@@ -31,6 +31,8 @@ unsigned long encLastTime;
 long positionLeft = 0;
 long positionRight = 0;
 
+int loopDelay = 10;
+
 #ifdef DEBUG
 char buf[256];
 #else
@@ -56,7 +58,6 @@ ros::Subscriber<std_msgs::Float64> subLeftEff("/left_wheel/control_effort", &lef
 ros::Subscriber<std_msgs::Float64> subRightEff("/right_wheel/control_effort", &rightEffCallback);
 
 int controlFrequency = 100;
-int loopDelay = 10;
 
 void setMotor(byte fwdPin, byte bkdPin, short val) {
     if (val > 0) {
