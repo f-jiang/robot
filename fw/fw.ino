@@ -11,10 +11,10 @@
 
 // #define DEBUG
 
-#define MOTOR_LB    6   // left backwards
-#define MOTOR_LF    7   // left forward
-#define MOTOR_RB    8   // right backwards
-#define MOTOR_RF    9   // right forward
+#define MOTOR_LB    8   // left backwards
+#define MOTOR_LF    9   // left forward
+#define MOTOR_RB    6   // right backwards
+#define MOTOR_RF    7   // right forward
 #define MOTOR_SLEEP 10
 #define MOTOR_FAULT 11
 
