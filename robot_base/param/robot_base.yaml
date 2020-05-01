@@ -15,7 +15,7 @@ base_controller:
   angular:
     z:
       has_velocity_limits: true
-      max_velocity: 2
+      max_velocity: 6.28
 
   enable_odom_tf: true
   odom_frame_id: odom
