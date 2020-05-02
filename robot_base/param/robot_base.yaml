@@ -5,7 +5,7 @@ base_controller:
   pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]  # TODO adjust
   twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
 
-  wheel_separation : 0.18 # TODO measure in solidworks 
+  wheel_separation : 0.17923
   wheel_radius : 0.03
 
   linear:
