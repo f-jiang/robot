@@ -91,7 +91,15 @@ float angularVelocity(const long& oldPosition,
 }
 
 float angularPosition(const long& position) {
-    return (position - (position / ENC_PULSES_PER_REVOLUTION) * ENC_PULSES_PER_REVOLUTION)
+    long wrappedPosition = position
+                           - static_cast<long>(position / ENC_PULSES_PER_REVOLUTION)
+                           * ENC_PULSES_PER_REVOLUTION;
+
+    if (position < 0) {
+        wrappedPosition += ENC_PULSES_PER_REVOLUTION;
+    }
+
+    return wrappedPosition
            / ENC_PULSES_PER_REVOLUTION
            * (PI * 2);
 }
