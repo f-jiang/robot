@@ -17,8 +17,9 @@ def callback(config, level):
 
 
 def publish():
-    pub = rospy.Publisher(rospy.get_param('~topic'), Float64, queue_size=10)
-    rate = rospy.Rate(rospy.get_param('~rate'))
+    pub = rospy.Publisher('setpoint', Float64, queue_size=10)
+    # TODO: python consts
+    rate = rospy.Rate(rospy.get_param('/control_frequency'))
     while not rospy.is_shutdown():
         pub.publish(value)
         rate.sleep()

@@ -206,6 +206,7 @@ int main(int argc, char** argv) {
     std::chrono::system_clock::time_point last_time = std::chrono::system_clock::now();
     int control_frequency;
     ros::param::get(robot_constants::params::kControlFrequency, control_frequency);
+    ROS_INFO_STREAM("base_node running at " << control_frequency << " hz");
     ros::TimerOptions control_timer(
             ros::Duration(1 / static_cast<double>(control_frequency)),
             std::bind(controlLoop, std::ref(hw), std::ref(cm), std::ref(last_time)), 

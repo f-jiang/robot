@@ -33,9 +33,9 @@ long positionRight = 0;
 
 int loopDelay = 10;
 
-#ifdef DEBUG
 char buf[256];
-#else
+
+#ifndef DEBUG
 // TODO integrate this into catkin so that robot_constants can be used here
 
 ros::NodeHandle nh;
@@ -129,8 +129,14 @@ void setup()
 #ifndef DEBUG
     nh.initNode();
 
+    while (!nh.connected()) {
+        nh.spinOnce();
+    }
+
     // TODO robot_constants::params::kControlFrequency
     nh.getParam("/control_frequency", &controlFrequency);
+    sprintf(buf, "fw_node running at %d hz", controlFrequency);
+    nh.loginfo(buf);
     loopDelay = round(1000 / static_cast<double>(controlFrequency));
 
     nh.advertise(pubLeftPos);
