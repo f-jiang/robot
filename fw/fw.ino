@@ -7,7 +7,7 @@
 
 // NOTE: currently this lib and the encoder code here rely on an unreleased fix for the arduino mbed core:
 // https://github.com/arduino/ArduinoCore-nRF528x-mbedos/pull/69
-#include <QuadratureEncoder.h>
+#include <QuadratureEncoder.h>  // fork: f-jiang/QuadratureEncoder
 
 // #define DEBUG
 
