@@ -166,8 +166,8 @@ void loop()
 
 #ifdef DEBUG
     sprintf(buf,
-            "pos_l: %6d, e_l: %6d, theta_l (deg): %4d, omega_l (deg/s): %8.2f, n_l (rpm): %8.2f, "
-                "pos_r: %6d, e_r: %6d, theta_r (deg): %4d, omega_r (deg/s): %8.2f, n_r (rpm): %8.2f\n",
+            "pos_l: %6d, e_l: %6d, theta_l (deg): %4f, omega_l (deg/s): %8.2f, n_l (rpm): %8.2f, "
+                "pos_r: %6d, e_r: %6d, theta_r (deg): %4f, omega_r (deg/s): %8.2f, n_r (rpm): %8.2f\n",
             newPositionLeft,
             encLeft.getEncoderErrorCount(),
             angularPositionLeft * 180 / PI,
