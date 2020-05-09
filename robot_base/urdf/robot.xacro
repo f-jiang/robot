@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+    <!-- TODO: xacro-ize everything: (http://wiki.ros.org/urdf/Tutorials/Using%20Xacro%20to%20Clean%20Up%20a%20URDF%20File) -->
+
+    <xacro:property name="base_radius" value="0.085"/>
+    <xacro:property name="base_height" value="0.1393"/>
+
+    <xacro:property name="wheel_radius" value="0.03"/>
+    <xacro:property name="wheel_thickness" value="0.008"/>
+    <!-- assuming no offset in base link c of m, and that mesh is perfectly
+         within bounds of collision cylinder -->
+    <xacro:property name="wheel_z_offset" value="${base_height/2 - 0.0065}"/>
+
+    <xacro:property name="caster_radius" value="0.0127"/>
+    <!-- assuming no offset in base link c of m, and that mesh is perfectly
+         within bounds of collision cylinder -->
+    <xacro:property name="caster_z_offset"
+                    value="${fabs(wheel_z_offset) + wheel_radius - caster_radius}"/>
+
+    <xacro:property name="wheelbase_width" value="0.17923"/>
+    <xacro:property name="wheelbase_length" value="0.12206"/>
+
+    <material name="black">
+        <color rgba="0 0 0 1"/>
+    </material>
+
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+
+    <material name="gray">
+        <color rgba="0.6 0.6 0.6 0.5"/>
+    </material>
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://robot_base/meshes/base.STL"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="${base_height}" radius="${base_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1.015"/>
+            <!-- treat as solid cylinder with c of m at centre -->
+            <!-- en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors -->
+            <inertia ixx="0.00611" ixy="0" ixz="0" iyy="0.00611" iyz="0" izz="0.008937"/>
+        </inertial>
+    </link>
+
+    <link name="left_wheel_link">
+        <visual>
+            <geometry>
+                <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.011398"/>
+            <inertia ixx="${2.612e-6}" ixy="0" ixz="0" iyy="${2.612e-6}" iyz="0" izz="${5.103e-6}"/>
+        </inertial>
+    </link>
+    <joint name="base_to_left_wheel" type="continuous">
+        <parent link="base_link"/>
+        <child link="left_wheel_link"/>
+        <origin xyz="0 ${wheelbase_width/2} -${wheel_z_offset}"
+                rpy="-${pi/2} 0 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <link name="right_wheel_link">
+        <visual>
+            <geometry>
+                <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.011398"/>
+            <inertia ixx="${2.612e-6}" ixy="0" ixz="0" iyy="${2.612e-6}" iyz="0" izz="${5.103e-6}"/>
+        </inertial>
+    </link>
+    <joint name="base_to_right_wheel" type="continuous">
+        <parent link="base_link"/>
+        <child link="right_wheel_link"/>
+        <origin xyz="0 -${wheelbase_width/2} -${wheel_z_offset}"
+                rpy="${pi/2} 0 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <link name="front_caster_link">
+        <visual>
+            <geometry>
+                <sphere radius="${caster_radius}"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="${caster_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.015"/>
+            <inertia ixx="${9.677e-7}" ixy="0" ixz="0" iyy="${9.677e-7}" iyz="0" izz="${9.677e-7}"/>
+        </inertial>
+    </link>
+    <joint name="base_to_front_caster" type="fixed">
+        <parent link="base_link"/>
+        <child link="front_caster_link"/>
+        <origin xyz="${wheelbase_length/2} 0 -${caster_z_offset}"/>
+        <dynamics friction="0"/>
+    </joint>
+
+    <link name="rear_caster_link">
+        <visual>
+            <geometry>
+                <sphere radius="${caster_radius}"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="${caster_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.015"/>
+            <inertia ixx="${9.677e-7}" ixy="0" ixz="0" iyy="${9.677e-7}" iyz="0" izz="${9.677e-7}"/>
+        </inertial>
+    </link>
+    <joint name="base_to_rear_caster" type="fixed">
+        <parent link="base_link"/>
+        <child link="rear_caster_link"/>
+        <origin xyz="-${wheelbase_length/2} 0 -${caster_z_offset}"/>
+        <dynamics friction="0"/>
+    </joint>
+</robot>
+
