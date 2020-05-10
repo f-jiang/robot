@@ -71,13 +71,26 @@
                 <inertia ixx="${2.612e-6}" ixy="0" ixz="0" iyy="${2.612e-6}" iyz="0" izz="${5.103e-6}"/>
             </inertial>
         </link>
-        <joint name="${parent_name}_to_${name}" type="continuous">
+
+        <xacro:property name="joint_name" value="${parent_name}_to_${name}"/>
+
+        <joint name="${joint_name}" type="continuous">
             <parent link="${parent_name}_link"/>
             <child link="${name}_link"/>
             <origin xyz="0 ${reflect*wheelbase_width/2} -${wheel_z_offset}"
                     rpy="${-reflect*pi/2} 0 0"/>
             <axis xyz="0 0 1"/>
         </joint>
+
+        <transmission name="${name}_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <actuator name="${name}_motor">
+                <mechanicalReduction>51.45</mechanicalReduction>
+            </actuator>
+            <joint name="${joint_name}">
+                <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            </joint>
+        </transmission>
     </xacro:macro>
     <xacro:wheel name="left_wheel" parent_name="base" reflect="1"/>
     <xacro:wheel name="right_wheel" parent_name="base" reflect="-1"/>
