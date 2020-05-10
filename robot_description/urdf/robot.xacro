@@ -35,7 +35,7 @@
     <link name="base_link">
         <visual>
             <geometry>
-                <mesh filename="package://robot_base/meshes/base.STL"/>
+                <mesh filename="package://robot_description/meshes/base.STL"/>
             </geometry>
             <material name="gray"/>
         </visual>
