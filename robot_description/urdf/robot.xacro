@@ -72,7 +72,7 @@
             </inertial>
         </link>
 
-        <xacro:property name="joint_name" value="${parent_name}_to_${name}"/>
+        <xacro:property name="joint_name" value="${parent_name}_to_${name}_joint"/>
 
         <joint name="${joint_name}" type="continuous">
             <parent link="${parent_name}_link"/>
@@ -114,7 +114,7 @@
                 <inertia ixx="${9.677e-7}" ixy="0" ixz="0" iyy="${9.677e-7}" iyz="0" izz="${9.677e-7}"/>
             </inertial>
         </link>
-        <joint name="${parent_name}_to_${name}" type="fixed">
+        <joint name="${parent_name}_to_${name}_joint" type="fixed">
             <parent link="${parent_name}_link"/>
             <child link="${name}_link"/>
             <origin xyz="${reflect*wheelbase_length/2} 0 -${caster_z_offset}"/>

@@ -28,8 +28,8 @@ public:
     static const char* kTimeoutParam;
 
     // $(find robot_base)/param/robot_base.yaml
-    const std::string kLeftJointName = "left_wheel_joint";
-    const std::string kRightJointName = "right_wheel_joint";
+    const std::string kLeftJointName = "base_to_left_wheel_joint";
+    const std::string kRightJointName = "base_to_right_wheel_joint";
 
     Robot() : private_nh("~") {
         ros::param::get(robot_constants::params::kControlFrequency, control_frequency_);
