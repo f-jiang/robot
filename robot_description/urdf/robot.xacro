@@ -20,11 +20,22 @@
     <xacro:property name="wheelbase_width" value="0.17923"/>
     <xacro:property name="wheelbase_length" value="0.12206"/>
 
+    <xacro:property name="camera_width" value="0.025"/>
+    <xacro:property name="camera_length" value="0.023862"/>
+    <xacro:property name="camera_thickness" value="0.009"/>
+    <xacro:property name="camera_mass" value="0.003"/>
+
+    <xacro:property name="laser_length" value="0.09674"/>
+    <xacro:property name="laser_width" value="0.07028"/>
+    <xacro:property name="laser_height" value="0.0577"/>
+    <xacro:property name="laser_mass" value="0.190"/>
+
     <xacro:include filename="$(find robot_description)/urdf/materials.xacro" />
 
     <link name="base_link">
         <visual>
             <geometry>
+                <!-- TODO fix this mesh's orientation -->
                 <mesh filename="package://robot_description/meshes/base.STL"/>
             </geometry>
             <material name="gray"/>
@@ -74,16 +85,6 @@
             <axis xyz="0 0 1"/>
         </joint>
 
-        <!-- This block provides the simulator (Gazebo) with information on a few additional
-        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
-        <gazebo reference="${link_name}">
-            <mu1 value="200.0"/>
-            <mu2 value="100.0"/>
-            <kp value="10000000.0" />
-            <kd value="1.0" />
-            <material>Gazebo/Black</material>
-        </gazebo>
-
         <transmission name="${name}_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <actuator name="${name}_motor">
@@ -125,24 +126,75 @@
             <origin xyz="${reflect*wheelbase_length/2} 0 -${caster_z_offset}"/>
             <dynamics friction="0"/>
         </joint>
-
-        <!-- This block provides the simulator (Gazebo) with information on a few additional
-        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
-        <gazebo reference="${link_name}">
-            <mu1 value="200.0"/>
-            <mu2 value="100.0"/>
-            <kp value="10000000.0" />
-            <kd value="1.0" />
-            <material>Gazebo/White</material>
-        </gazebo>
     </xacro:macro>
     <xacro:caster name="front_caster" parent_name="base" reflect="1"/>
     <xacro:caster name="rear_caster" parent_name="base" reflect="-1"/>
 
-    <gazebo>
-        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-            <robotNamespace>/</robotNamespace>
-        </plugin>
-    </gazebo>
+    <!-- camera -->
+    <xacro:property name="camera_sensor_x" value="0.009462"/>
+    <link name="camera_link">
+        <xacro:property name="camera_x_offset" value="${camera_length/2 - camera_sensor_x}"/>
+        <visual>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_thickness}"/>
+            </geometry>
+            <origin xyz="${-camera_x_offset} 0 0"/>
+            <material name="green"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_thickness}"/>
+            </geometry>
+            <origin xyz="${-camera_x_offset} 0 0"/>
+        </collision>
+        <inertial>
+            <mass value="${camera_mass}"/>
+            <!-- inertia tensor approximation using cuboid -->
+            <inertia ixx="${1.02979e-5}" ixy="0" ixz="0" iyy="${1.1178e-5}" iyz="0" izz="${1.8911e-5}"/>
+            <origin xyz="${-camera_x_offset} 0 0"/>
+        </inertial>
+    </link>
+    <joint name="base_to_camera_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera_link"/>
+        <origin xyz="${0.0602+camera_thickness/2} 0 ${base_height/2+0.0025+camera_sensor_x}"
+                rpy="0 ${pi/2} 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <!-- laser -->
+    <xacro:property name="laser_sensor_z" value="${0.042 - laser_height/2}"/>
+    <link name="laser_link">
+        <xacro:property name="laser_x_offset" value="${laser_length/2 - 0.03514}"/>
+        <visual>
+            <geometry>
+                <mesh filename="package://robot_description/meshes/rplidar_main.STL"/>
+            </geometry>
+            <origin xyz="${-laser_x_offset} 0 ${-laser_sensor_z}"/>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${laser_length} ${laser_width} ${laser_height}"/>
+            </geometry>
+            <origin xyz="${-laser_x_offset} 0 ${-laser_sensor_z}"/>
+        </collision>
+        <inertial>
+            <mass value="${laser_mass}"/>
+            <!-- inertia tensor approximation using cuboid -->
+            <inertia ixx="${2.0089e-4}" ixy="0" ixz="0" iyy="${2.2638e-4}" iyz="0" izz="${1.3092e-4}"/>
+            <origin xyz="${-laser_x_offset} 0 ${-laser_sensor_z}"/>
+        </inertial>
+    </link>
+    <joint name="base_to_laser_joint" type="fixed">
+        <xacro:property name="laser_z_offset" value="${(base_height + laser_height) / 2 + laser_sensor_z}"/>
+        <parent link="base_link"/>
+        <child link="laser_link"/>
+        <origin xyz="0 0 ${laser_z_offset}"
+                rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <xacro:include filename="$(find robot_description)/urdf/robot.gazebo.xacro" />
 </robot>
 

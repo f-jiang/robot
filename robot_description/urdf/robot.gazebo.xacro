@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot_gazebo">
+    <xacro:macro name="wheel_gazebo" params="name">
+        <!-- This block provides the simulator (Gazebo) with information on a few additional
+        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
+        <gazebo reference="${name}_link">
+            <mu1 value="200.0"/>
+            <mu2 value="100.0"/>
+            <kp value="10000000.0" />
+            <kd value="1.0" />
+            <material>Gazebo/Black</material>
+        </gazebo>
+    </xacro:macro>
+    <xacro:wheel_gazebo name="left_wheel"/>
+    <xacro:wheel_gazebo name="right_wheel"/>
+
+    <xacro:macro name="caster_gazebo" params="name">
+        <!-- This block provides the simulator (Gazebo) with information on a few additional
+        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
+        <gazebo reference="${name}_link">
+            <mu1 value="200.0"/>
+            <mu2 value="100.0"/>
+            <kp value="10000000.0" />
+            <kd value="1.0" />
+            <material>Gazebo/White</material>
+        </gazebo>
+    </xacro:macro>
+    <xacro:caster_gazebo name="front_caster"/>
+    <xacro:caster_gazebo name="rear_caster"/>
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+</robot>
