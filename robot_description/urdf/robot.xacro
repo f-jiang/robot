@@ -53,7 +53,10 @@
     </link>
 
     <xacro:macro name="wheel" params="name parent_name reflect">
-        <link name="${name}_link">
+        <xacro:property name="link_name" value="${name}_link"/>
+        <xacro:property name="joint_name" value="${parent_name}_to_${name}_joint"/>
+
+        <link name="${link_name}">
             <visual>
                 <geometry>
                     <cylinder length="${wheel_thickness}" radius="${wheel_radius}"/>
@@ -72,15 +75,24 @@
             </inertial>
         </link>
 
-        <xacro:property name="joint_name" value="${parent_name}_to_${name}_joint"/>
 
         <joint name="${joint_name}" type="continuous">
             <parent link="${parent_name}_link"/>
-            <child link="${name}_link"/>
+            <child link="${link_name}"/>
             <origin xyz="0 ${reflect*wheelbase_width/2} -${wheel_z_offset}"
                     rpy="${-reflect*pi/2} 0 0"/>
             <axis xyz="0 0 1"/>
         </joint>
+
+        <!-- This block provides the simulator (Gazebo) with information on a few additional
+        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
+        <gazebo reference="${link_name}">
+            <mu1 value="200.0"/>
+            <mu2 value="100.0"/>
+            <kp value="10000000.0" />
+            <kd value="1.0" />
+            <material>Gazebo/Black</material>
+        </gazebo>
 
         <transmission name="${name}_trans">
             <type>transmission_interface/SimpleTransmission</type>
@@ -96,7 +108,9 @@
     <xacro:wheel name="right_wheel" parent_name="base" reflect="-1"/>
 
     <xacro:macro name="caster" params="name parent_name reflect">
-        <link name="${name}_link">
+        <xacro:property name="link_name" value="${name}_link"/>
+
+        <link name="${link_name}">
             <visual>
                 <geometry>
                     <sphere radius="${caster_radius}"/>
@@ -114,12 +128,23 @@
                 <inertia ixx="${9.677e-7}" ixy="0" ixz="0" iyy="${9.677e-7}" iyz="0" izz="${9.677e-7}"/>
             </inertial>
         </link>
+
         <joint name="${parent_name}_to_${name}_joint" type="fixed">
             <parent link="${parent_name}_link"/>
-            <child link="${name}_link"/>
+            <child link="${link_name}"/>
             <origin xyz="${reflect*wheelbase_length/2} 0 -${caster_z_offset}"/>
             <dynamics friction="0"/>
         </joint>
+
+        <!-- This block provides the simulator (Gazebo) with information on a few additional
+        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
+        <gazebo reference="${link_name}">
+            <mu1 value="200.0"/>
+            <mu2 value="100.0"/>
+            <kp value="10000000.0" />
+            <kd value="1.0" />
+            <material>Gazebo/White</material>
+        </gazebo>
     </xacro:macro>
     <xacro:caster name="front_caster" parent_name="base" reflect="1"/>
     <xacro:caster name="rear_caster" parent_name="base" reflect="-1"/>
