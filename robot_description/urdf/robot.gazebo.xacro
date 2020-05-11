@@ -63,9 +63,8 @@
                 <alwaysOn>true</alwaysOn>
                 <updateRate>0.0</updateRate>
                 <robotNamespace>/</robotNamespace>
-                <cameraName>camera</cameraName>
-                <imageTopicName>image_raw</imageTopicName>
-                <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+                <imageTopicName>/sensors/camera/image_raw</imageTopicName>
+                <cameraInfoTopicName>/sensors/camera/camera_info</cameraInfoTopicName>
                 <frameName>camera_link</frameName>
                 <hackBaseline>0.07</hackBaseline>
                 <distortionK1>0.0</distortionK1>
