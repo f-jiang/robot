@@ -20,17 +20,7 @@
     <xacro:property name="wheelbase_width" value="0.17923"/>
     <xacro:property name="wheelbase_length" value="0.12206"/>
 
-    <material name="black">
-        <color rgba="0 0 0 1"/>
-    </material>
-
-    <material name="white">
-        <color rgba="1 1 1 1"/>
-    </material>
-
-    <material name="gray">
-        <color rgba="0.6 0.6 0.6 0.5"/>
-    </material>
+    <xacro:include filename="$(find robot_description)/urdf/materials.xacro" />
 
     <link name="base_link">
         <visual>
