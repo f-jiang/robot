@@ -80,7 +80,7 @@
             <parent link="${parent_name}_link"/>
             <child link="${link_name}"/>
             <origin xyz="0 ${reflect*wheelbase_width/2} -${wheel_z_offset}"
-                    rpy="${-reflect*pi/2} 0 0"/>
+                    rpy="${-pi/2} 0 0"/>
             <axis xyz="0 0 1"/>
         </joint>
 
@@ -100,7 +100,7 @@
                 <mechanicalReduction>51.45</mechanicalReduction>
             </actuator>
             <joint name="${joint_name}">
-                <hardwareInterface>VelocityJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
             </joint>
         </transmission>
     </xacro:macro>
@@ -148,5 +148,11 @@
     </xacro:macro>
     <xacro:caster name="front_caster" parent_name="base" reflect="1"/>
     <xacro:caster name="rear_caster" parent_name="base" reflect="-1"/>
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
 </robot>
 
