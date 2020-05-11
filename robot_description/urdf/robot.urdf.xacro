@@ -136,30 +136,30 @@
         <xacro:property name="camera_x_offset" value="${camera_length/2 - camera_sensor_x}"/>
         <visual>
             <geometry>
-                <box size="${camera_length} ${camera_width} ${camera_thickness}"/>
+                <box size="${camera_thickness} ${camera_width} ${camera_length}"/>
             </geometry>
-            <origin xyz="${-camera_x_offset} 0 0"/>
+            <origin xyz="0 0 ${camera_x_offset}"/>
             <material name="green"/>
         </visual>
         <collision>
             <geometry>
-                <box size="${camera_length} ${camera_width} ${camera_thickness}"/>
+                <box size="${camera_thickness} ${camera_width} ${camera_length}"/>
             </geometry>
-            <origin xyz="${-camera_x_offset} 0 0"/>
+            <origin xyz="0 0 ${camera_x_offset}"/>
         </collision>
         <inertial>
             <mass value="${camera_mass}"/>
             <!-- inertia tensor approximation using cuboid -->
             <inertia ixx="${1.02979e-5}" ixy="0" ixz="0" iyy="${1.1178e-5}" iyz="0" izz="${1.8911e-5}"/>
-            <origin xyz="${-camera_x_offset} 0 0"/>
+            <origin xyz="0 0 ${camera_x_offset}"/>
         </inertial>
     </link>
     <joint name="base_to_camera_joint" type="fixed">
         <parent link="base_link"/>
         <child link="camera_link"/>
         <origin xyz="${0.0602+camera_thickness/2} 0 ${base_height/2+0.0025+camera_sensor_x}"
-                rpy="0 ${pi/2} 0"/>
-        <axis xyz="0 0 1"/>
+                rpy="0 0 0"/>
+        <axis xyz="1 0 0"/>
     </joint>
 
     <!-- laser -->
