@@ -27,7 +27,7 @@ public:
     static const char* kMaxSpeedParam;
     static const char* kTimeoutParam;
 
-    // $(find robot_base)/param/robot_base.yaml
+    // $(find robot_base)/param/diff_drive.yaml
     const std::string kLeftJointName = "base_to_left_wheel_joint";
     const std::string kRightJointName = "base_to_right_wheel_joint";
 
