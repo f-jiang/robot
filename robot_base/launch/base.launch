@@ -1,5 +1,8 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
+    <arg name="model" default="$(find robot_description)/urdf/robot.urdf.xacro"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
 
     <include file="$(find robot_base)/launch/sensors_base.launch" unless="$(arg use_gazebo)"/>
 
@@ -10,7 +13,9 @@
             <param name="default_topic" value="/base_controller/cmd_vel"/>
         </node>
 
-        <include file="$(find robot_base)/launch/gazebo.launch"/>
+        <include file="$(find robot_base)/launch/gazebo.launch">
+            <arg name="model" value="$(arg model)"/>
+        </include>
     </group>
 
     <include file="$(find robot_base)/launch/drive_base.launch">
