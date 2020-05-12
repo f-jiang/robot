@@ -16,4 +16,8 @@
     <include file="$(find robot_base)/launch/drive_base.launch">
         <arg name="use_gazebo" value="$(arg use_gazebo)"/>
     </include>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="30.0" />
+    </node>
 </launch>
