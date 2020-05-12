@@ -1,0 +1,19 @@
+<launch>
+    <arg name="use_gazebo" default="false"/>
+
+    <include file="$(find robot_base)/launch/sensors_base.launch" unless="$(arg use_gazebo)"/>
+
+    <group if="$(arg use_gazebo)">
+        <arg name="rvizconfig" default="$(find robot_base)/rviz/urdf.rviz"/>
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/>
+        <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+            <param name="default_topic" value="/base_controller/cmd_vel"/>
+        </node>
+
+        <include file="$(find robot_base)/launch/gazebo.launch"/>
+    </group>
+
+    <include file="$(find robot_base)/launch/drive_base.launch">
+        <arg name="use_gazebo" value="$(arg use_gazebo)"/>
+    </include>
+</launch>
