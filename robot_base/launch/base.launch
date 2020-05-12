@@ -1,5 +1,6 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
+    <arg name="joystick_available" default="false"/>
     <arg name="model" default="$(find robot_description)/urdf/robot.urdf.xacro"/>
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
@@ -7,9 +8,11 @@
     <include file="$(find robot_base)/launch/sensors_base.launch" unless="$(arg use_gazebo)"/>
 
     <group if="$(arg use_gazebo)">
-        <arg name="rvizconfig" default="$(find robot_base)/rviz/urdf.rviz"/>
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/>
-        <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+        <node name="rqt_robot_steering"
+            pkg="rqt_robot_steering"
+            type="rqt_robot_steering"
+            unless="$(arg joystick_available)">
+
             <param name="default_topic" value="/base_controller/cmd_vel"/>
         </node>
 
