@@ -7,6 +7,9 @@
     <arg name="model" default="$(find robot_description)/urdf/robot.urdf.xacro"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+        <!-- <arg name="world_name" value="worlds/mud.world"/> -->
+
         <arg name="debug" value="$(arg debug)" />
         <arg name="gui" value="$(arg gui)" />
         <arg name="paused" value="$(arg paused)"/>
