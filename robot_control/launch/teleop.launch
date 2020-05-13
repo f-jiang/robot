@@ -1,14 +1,16 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
 
-    <!-- TODO may need to make address resolution more robust -->
-    <!-- http://wiki.ros.org/ROS/NetworkSetup -->
-
     <!-- local slave - control station -->
     <group>
         <machine name="dev-machine"
             address="$(env ROS_HOSTNAME)"
-            env-loader="/opt/ros/$(env ROS_DISTRO)/env.sh"/>
+            env-loader="~/ros_remote_env.sh"
+            unless="$(arg use_gazebo)"/>
+        <machine name="dev-machine"
+            address="localhost"
+            env-loader="/opt/ros/$(env ROS_DISTRO)/env.sh"
+            if="$(arg use_gazebo)"/>
 
         <node pkg="joy"
             name="joy_node"
@@ -42,10 +44,11 @@
         </include>
     </group>
 
+    <!-- remote master -->
     <group unless="$(arg use_gazebo)">
         <machine name="robot"
             address="robot-desktop"
-            env-loader="/opt/ros/melodic/env.sh"
+            env-loader="~/ros_env.sh"
             user="robot"/>
 
         <include file="$(find robot_base)/launch/base.launch">
