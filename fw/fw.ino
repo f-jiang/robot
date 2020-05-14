@@ -129,6 +129,14 @@ void setup()
 #ifndef DEBUG
     nh.initNode();
 
+    nh.advertise(pubLeftPos);
+    nh.advertise(pubRightPos);
+    nh.advertise(pubLeftVel);
+    nh.advertise(pubRightVel);
+
+    nh.subscribe(subLeftEff);
+    nh.subscribe(subRightEff);
+
     while (!nh.connected()) {
         nh.spinOnce();
     }
@@ -138,14 +146,6 @@ void setup()
     sprintf(buf, "fw_node running at %d hz", controlFrequency);
     nh.loginfo(buf);
     loopDelay = round(1000 / static_cast<double>(controlFrequency));
-
-    nh.advertise(pubLeftPos);
-    nh.advertise(pubRightPos);
-    nh.advertise(pubLeftVel);
-    nh.advertise(pubRightVel);
-
-    nh.subscribe(subLeftEff);
-    nh.subscribe(subRightEff);
 #endif
 
     delay(1000);
