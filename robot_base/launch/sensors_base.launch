@@ -1,18 +1,24 @@
 <launch>
-    <remap from="scan" to="laser_scan"/>
-    <include ns="sensors" file="$(find rplidar_ros)/launch/rplidar.launch">
-        <param name="frame_id" value="laser_link"/>
-    </include>
+    <group ns="sensors">
+        <remap from="scan" to="laser_scan"/>
+        <node pkg="rplidar_ros" name="rplidar_node" type="rplidarNode" output="screen">
+            <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+            <param name="serial_baudrate"     type="int"    value="115200"/>
+            <param name="frame_id"            type="string" value="laser_link"/>
+            <param name="inverted"            type="bool"   value="false"/>
+            <param name="angle_compensate"    type="bool"   value="true"/>
+        </node>
 
-    <node ns="sensors" pkg="jetson_camera" type="jetson_camera_node" name="camera" clear_params="true" output="screen">
-        <param name="cap_width" value="1280"/>
-        <param name="cap_height" value="720"/>
-        <param name="width" value="1024"/>
-        <param name="height" value="576"/>
-        <param name="fps" value="60"/>
-        <param name="flip_method" value="2"/> <!-- rotate-180 -->
+        <node pkg="jetson_camera" type="jetson_camera_node" name="camera" clear_params="true" output="screen">
+            <param name="cap_width" value="1280"/>
+            <param name="cap_height" value="720"/>
+            <param name="width" value="1024"/>
+            <param name="height" value="576"/>
+            <param name="fps" value="60"/>
+            <param name="flip_method" value="2"/> <!-- rotate-180 -->
 
-        <param name="frame_id" value="camera_link"/>
-        <param name="camera_info_url" value="file://$(find jetson_camera)/camera_info/raspicam_v2.yaml"/>
-    </node>
+            <param name="frame_id" value="camera_link"/>
+            <param name="camera_info_url" value="file://$(find jetson_camera)/camera_info/raspicam_v2.yaml"/>
+        </node>
+    </group>
 </launch>

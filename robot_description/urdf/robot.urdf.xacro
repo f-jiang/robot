@@ -170,7 +170,8 @@
             <geometry>
                 <mesh filename="package://robot_description/meshes/rplidar_main.STL"/>
             </geometry>
-            <origin xyz="${-laser_x_offset} 0 ${-laser_sensor_z}"/>
+            <origin xyz="${laser_x_offset} 0 ${-laser_sensor_z}"
+                    rpy="0 0 ${pi}"/>
             <material name="black"/>
         </visual>
         <collision>
@@ -191,7 +192,7 @@
         <parent link="base_link"/>
         <child link="laser_link"/>
         <origin xyz="0 0 ${laser_z_offset}"
-                rpy="0 0 0"/>
+                rpy="0 0 ${pi}"/>
         <axis xyz="0 0 1"/>
     </joint>
 
