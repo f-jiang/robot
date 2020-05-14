@@ -30,7 +30,7 @@
      </node>
 
     <node name="fw_node"
-          pkg="rosserial_python"
+          pkg="rosserial_arduino"
           type="serial_node.py"
           output="screen"
           respawn="true">
