@@ -5,13 +5,11 @@
     <group>
         <machine name="dev-machine"
             address="$(env ROS_HOSTNAME)"
-            env-loader="~/ros_remote_env.sh"
             unless="$(arg use_gazebo)"/>
 
         <!-- simulation - local machine only -->
         <machine name="dev-machine"
             address="localhost"
-            env-loader="/opt/ros/$(env ROS_DISTRO)/env.sh"
             if="$(arg use_gazebo)"/>
 
         <node pkg="joy"
