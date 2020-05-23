@@ -28,4 +28,12 @@
     <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
         <param name="publish_frequency" type="double" value="30.0" />
     </node>
+    <node pkg="tf"
+		type="static_transform_publisher"
+		name="front_caster_link_broadcaster"
+		args="0.061 0 -0.080 0 0 0 base_link front_caster_link 100"/>
+    <node pkg="tf"
+		type="static_transform_publisher"
+		name="rear_caster_link_broadcaster"
+		args="-0.061 0 -0.080 0 0 0 base_link rear_caster_link 100"/>
 </launch>
