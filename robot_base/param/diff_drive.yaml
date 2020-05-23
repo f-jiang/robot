@@ -14,7 +14,7 @@ linear:
 angular:
   z:
     has_velocity_limits: true
-    max_velocity: 6.28
+    max_velocity: 1.5
 
 # TODO publish rate /control_frequency
 base_frame_id: base_link
