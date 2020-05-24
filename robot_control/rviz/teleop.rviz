@@ -6,8 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Image1
+        - /Image1/Status1
         - /LaserScan1
-        - /LaserScan1/Status1
         - /TF1
         - /TF1/Frames1
         - /RobotModel1
@@ -64,7 +65,7 @@ Visualization Manager:
       Name: Image
       Normalize Range: true
       Queue Size: 2
-      Transport Hint: raw
+      Transport Hint: compressed
       Unreliable: false
       Value: true
     - Alpha: 1
