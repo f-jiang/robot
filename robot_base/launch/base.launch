@@ -1,6 +1,6 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
-    <arg name="joystick_available" default="false"/>
+    <arg name="onscreen_steering" default="false"/>
     <arg name="model" value="$(find robot_description)/urdf/robot.urdf.xacro"/>
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
@@ -11,7 +11,7 @@
         <node name="rqt_robot_steering"
             pkg="rqt_robot_steering"
             type="rqt_robot_steering"
-            unless="$(arg joystick_available)">
+            if="$(arg onscreen_steering)">
 
             <param name="default_topic" value="/base_controller/cmd_vel"/>
         </node>

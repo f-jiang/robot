@@ -41,7 +41,6 @@
 
         <include file="$(find robot_base)/launch/base.launch" if="$(arg use_gazebo)">
             <arg name="use_gazebo" value="true"/>
-            <arg name="joystick_available" value="true"/>
         </include>
     </group>
 
@@ -55,7 +54,6 @@
 
         <include file="$(find robot_base)/launch/base.launch">
             <arg name="use_gazebo" value="false"/>
-            <arg name="joystick_available" value="true"/>
         </include>
     </group>
 </launch>
