@@ -18,8 +18,8 @@
         <!-- This block provides the simulator (Gazebo) with information on a few additional
         physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
         <gazebo reference="${name}_link">
-            <mu1 value="200.0"/>
-            <mu2 value="100.0"/>
+            <mu1 value="0"/>
+            <mu2 value="0"/>
             <kp value="10000000.0" />
             <kd value="1.0" />
             <material>Gazebo/White</material>
