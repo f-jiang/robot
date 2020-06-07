@@ -120,12 +120,11 @@
             </inertial>
         </link>
 
-        <joint name="${parent_name}_to_${name}_joint" type="continuous">
+        <joint name="${parent_name}_to_${name}_joint" type="fixed">
             <parent link="${parent_name}_link"/>
             <child link="${link_name}"/>
             <origin xyz="${reflect*wheelbase_length/2} 0 -${caster_z_offset}"/>
             <dynamics friction="0"/>
-            <axis xyz="0 1 0"/>
         </joint>
     </xacro:macro>
     <xacro:caster name="front_caster" parent_name="base" reflect="1"/>
