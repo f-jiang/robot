@@ -3,6 +3,18 @@
     <arg name="onscreen_steering" default="false"/>
     <arg name="model" value="$(find robot_description)/urdf/robot.urdf.xacro"/>
 
+    <machine name="robot"
+        address="robot-desktop"
+        env-loader="~/ros_env.sh"
+        default="true"
+        user="robot"
+        unless="$(arg use_gazebo)"/>
+
+    <!-- simulation - local machine only -->
+    <machine name="dev-machine"
+        address="localhost"
+        if="$(arg use_gazebo)"/>
+
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
 
     <include file="$(find robot_base)/launch/sensors_base.launch" unless="$(arg use_gazebo)"/>
