@@ -1,7 +1,7 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
     <arg name="joystick_available" default="false"/>
-    <arg name="model" default="$(find robot_description)/urdf/robot.urdf.xacro"/>
+    <arg name="model" value="$(find robot_description)/urdf/robot.urdf.xacro"/>
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
 
