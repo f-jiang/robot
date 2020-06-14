@@ -1,6 +1,8 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
     <arg name="onscreen_steering" default="false"/>
+    <arg name="world_name" default="worlds/empty.world"/>
+
     <arg name="model" value="$(find robot_description)/urdf/robot.urdf.xacro"/>
 
     <machine name="robot"
@@ -28,7 +30,9 @@
             <param name="default_topic" value="/base_controller/cmd_vel"/>
         </node>
 
-        <include file="$(find robot_base)/launch/gazebo.launch"/>
+        <include file="$(find robot_gazebo)/launch/gazebo.launch">
+            <arg name="world_name" default="$(arg world_name)"/>
+        </include>
     </group>
 
     <include file="$(find robot_base)/launch/drive_base.launch">
