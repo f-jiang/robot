@@ -1,5 +1,6 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
+    <arg name="diff_drive_controller_name" default="base_controller"/>
 
     <rosparam command="load"
         file="$(find robot_base)/param/joints.yaml"
@@ -7,7 +8,7 @@
 
     <rosparam command="load"
         file="$(find robot_base)/param/diff_drive.yaml"
-        ns="base_controller"/>
+        ns="$(arg diff_drive_controller_name)"/>
 
     <group unless="$(arg use_gazebo)">
         <include file="$(find robot_base)/launch/robot_hw.launch"/>
@@ -22,5 +23,5 @@
         name="controller_spawner"
         type="spawner"
         output="screen"
-        args="joint_state_controller base_controller"/>
+        args="joint_state_controller $(arg diff_drive_controller_name)"/>
 </launch>

@@ -4,6 +4,7 @@
     <arg name="world_name" default="worlds/empty.world"/>
 
     <arg name="model" value="$(find robot_description)/urdf/robot.urdf.xacro"/>
+    <arg name="diff_drive_controller_name" value="base_controller"/>
 
     <machine name="robot"
         address="robot-desktop"
@@ -19,6 +20,8 @@
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
 
+    <remap from="/$(arg diff_drive_controller_name)/odom" to="/odom"/>
+
     <include file="$(find robot_base)/launch/sensors_base.launch" unless="$(arg use_gazebo)"/>
 
     <group if="$(arg use_gazebo)">
@@ -27,7 +30,7 @@
             type="rqt_robot_steering"
             if="$(arg onscreen_steering)">
 
-            <param name="default_topic" value="/base_controller/cmd_vel"/>
+            <param name="default_topic" value="/$(arg diff_drive_controller_name)/cmd_vel"/>
         </node>
 
         <include file="$(find robot_gazebo)/launch/gazebo.launch">
@@ -37,6 +40,8 @@
 
     <include file="$(find robot_base)/launch/drive_base.launch">
         <arg name="use_gazebo" value="$(arg use_gazebo)"/>
+        <arg name="diff_drive_controller_name"
+            value="$(arg diff_drive_controller_name)"/>
     </include>
 
     <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
