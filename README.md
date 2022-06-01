@@ -46,3 +46,7 @@ roslaunch world_name:=worlds/rooms.world use_gazebo:=true robot_base base.launch
 roslaunch use_gazebo:=true robot_control teleop.launch
 ```
 
+This is how the simulation should look:
+
+<img src="https://raw.githubusercontent.com/f-jiang/robot/master/images/robot_in_gazebo.png" width="600">
+
