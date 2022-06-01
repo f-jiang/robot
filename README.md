@@ -42,6 +42,7 @@ source devel/setup.bash
 # run the simulation
 roslaunch world_name:=worlds/rooms.world use_gazebo:=true robot_base base.launch
 
-# run teleop
+# run teleop (currently requires a joystick, such as a Xbox Controller)
 roslaunch use_gazebo:=true robot_control teleop.launch
 ```
+
