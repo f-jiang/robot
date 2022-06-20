@@ -1,5 +1,6 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
+    <arg name="use_joystick" default="false"/>
 
     <!-- local slave - control station -->
     <machine name="dev-machine"
@@ -11,30 +12,40 @@
         address="localhost"
         if="$(arg use_gazebo)"/>
 
-    <node pkg="joy"
-        name="joy_node"
-        type="joy_node"
-        output="screen">
-        <param name="~dev" value="/dev/input/js0"/>
-    </node>
-
-    <node pkg="teleop_twist_joy"
+    <node unless="$(arg use_joystick)"
+        pkg="teleop_twist_keyboard"
         name="teleop_node"
-        type="teleop_node"
+        type="teleop_twist_keyboard.py"
         output="screen">
-        <!-- mappings for x360 controller -->
-        <param name="~enable_button" value="4"/>
-        <param name="~enable_turbo_button" value="5"/>
-        <param name="~axis_linear" value="1" type="int"/>
-        <param name="~axis_angular" value="3" type="int"/>
-
-        <!-- TODO map to base_controller speed params -->
-        <param name="~scale_linear" value="0.3" type="double"/>
-        <param name="~scale_linear_turbo" value="0.5" type="double"/>
-        <param name="~scale_angular" value="1.5" type="double"/>
-
         <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
     </node>
+
+    <group if="$(arg use_joystick)">
+        <node pkg="joy"
+            name="joy_node"
+            type="joy_node"
+            output="screen">
+            <param name="~dev" value="/dev/input/js0"/>
+        </node>
+
+        <node pkg="teleop_twist_joy"
+            name="teleop_node"
+            type="teleop_node"
+            output="screen">
+            <!-- mappings for x360 controller -->
+            <param name="~enable_button" value="4"/>
+            <param name="~enable_turbo_button" value="5"/>
+            <param name="~axis_linear" value="1" type="int"/>
+            <param name="~axis_angular" value="3" type="int"/>
+
+            <!-- TODO map to base_controller speed params -->
+            <param name="~scale_linear" value="0.3" type="double"/>
+            <param name="~scale_linear_turbo" value="0.5" type="double"/>
+            <param name="~scale_angular" value="1.5" type="double"/>
+
+            <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
+        </node>
+    </group>
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_control)/rviz/teleop.rviz"/>
 </launch>
