@@ -1,6 +1,7 @@
 <launch>
     <arg name="use_gazebo" default="false"/>
-    <arg name="use_joystick" default="false"/>
+    <arg name="use_joy" default="false"/>
+    <arg name="joy_device" default="/dev/input/js0"/>
 
     <!-- local slave - control station -->
     <machine name="dev-machine"
@@ -12,7 +13,7 @@
         address="localhost"
         if="$(arg use_gazebo)"/>
 
-    <node unless="$(arg use_joystick)"
+    <node unless="$(arg use_joy)"
         pkg="teleop_twist_keyboard"
         name="teleop_node"
         type="teleop_twist_keyboard.py"
@@ -20,12 +21,12 @@
         <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
     </node>
 
-    <group if="$(arg use_joystick)">
+    <group if="$(arg use_joy)">
         <node pkg="joy"
             name="joy_node"
             type="joy_node"
             output="screen">
-            <param name="~dev" value="/dev/input/js0"/>
+            <param name="~dev" value="$(arg joy_device)"/>
         </node>
 
         <node pkg="teleop_twist_joy"
