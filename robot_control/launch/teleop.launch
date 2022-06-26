@@ -2,6 +2,7 @@
     <arg name="use_gazebo" default="false"/>
     <arg name="use_joy" default="false"/>
     <arg name="joy_device" default="/dev/input/js0"/>
+    <arg name="diff_drive_controller_name" value="base_controller"/>
 
     <!-- local slave - control station -->
     <machine name="dev-machine"
@@ -18,7 +19,7 @@
         name="teleop_node"
         type="teleop_twist_keyboard.py"
         output="screen">
-        <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
+        <remap from="cmd_vel" to="/$(arg diff_drive_controller_name)/cmd_vel"/>
     </node>
 
     <group if="$(arg use_joy)">
@@ -44,7 +45,7 @@
             <param name="~scale_linear_turbo" value="0.5" type="double"/>
             <param name="~scale_angular" value="1.5" type="double"/>
 
-            <remap from="cmd_vel" to="/base_controller/cmd_vel"/>
+            <remap from="cmd_vel" to="/$(arg diff_drive_controller_name)/cmd_vel"/>
         </node>
     </group>
 
